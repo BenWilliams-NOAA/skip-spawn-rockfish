@@ -1,0 +1,7 @@
+library(tidytable)
+library(ggplot2)
+library(foreach)
+library(doParallel)
+library(RTMB)
+# remotes::install_git("BenWilliams-NOAA/afscassess")
+theme_set(afscassess::theme_report())
