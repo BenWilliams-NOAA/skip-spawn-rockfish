@@ -62,16 +62,16 @@ mismatch_iter <- function(i, rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
                    log_M = factor(NA), 
                    log_q = factor(NA),
                    log_a50C = factor(NA), deltaC = factor(NA),
-                   log_a50S = factor(NA), deltaS = factor(NA),
-                   log_F40 = factor(NA),
-                   log_F40_f = factor(NA))
+                   log_a50S = factor(NA), deltaS = factor(NA))#,
+                   # log_F40 = factor(NA),
+                   # log_F40_f = factor(NA))
   
   # results containers
   res_template <- list(data = vector("list", n_years),
                        report = vector("list", n_years), # stores full report
                        projection = list(tot_bio = numeric(n_years), spawn_bio = numeric(n_years),
                                          spawn_bio_f = numeric(n_years), catch = numeric(n_years), 
-                                         recruits = numeric(n_years)))
+                                         recruits = numeric(n_years), target_F = numeric(n_years)))
   results <- list(i = res_template, ii = res_template)
   
   # time loop
@@ -85,10 +85,10 @@ mismatch_iter <- function(i, rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
       
       if(s=="i") {
         ssb_est = as.numeric(tail(rpt$spawn_bio_f, 1))
-        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40_f), as.numeric(rpt$F40_f)) * .4
+        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40_f), as.numeric(rpt$F40_f)) # * .4 add this in if want things similar to current fishery
       } else {
         ssb_est = as.numeric(tail(rpt$spawn_bio, 1))
-        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40), as.numeric(rpt$F40)) * .4
+        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40), as.numeric(rpt$F40)) # * .4 add this in if want things similar to current fishery
       }
       
       # project population
@@ -106,6 +106,7 @@ mismatch_iter <- function(i, rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
       results[[s]]$projection$tot_bio[y] <- sum(N_prev * rpt$waa)
       results[[s]]$projection$spawn_bio[y] <- sum(N_prev * spawn_adj * rpt$waa * bio_mat[, y] * 0.5)
       results[[s]]$projection$spawn_bio_f[y] <- sum(N_prev * spawn_adj * rpt$waa * func_mat[, y] * 0.5)
+      results[[s]]$projection$target_F[y] <- F_targets[[s]]
       
       # project 1-step
       step = project_step(N_prev, F_targets[[s]], M, rpt$slx[, 1], rec_matrix[i, y])
@@ -311,6 +312,7 @@ extract_results <- function(res_list, start_year = NULL) {
         spawn_bio_fr = spf, 
         catch = proj$catch,
         recruits = proj$recruits,
+        F_target_val = proj$target_F,
         
         # Reference Points
         B35 = B35,

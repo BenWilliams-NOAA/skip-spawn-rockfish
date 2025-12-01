@@ -10,14 +10,9 @@ source(here::here("R", "em.R"))
 # data ----
 data <- readRDS(here::here("data", "dat.RDS"))
 pars <- readRDS(here::here("data", "pars.RDS"))
-# globals ----
-
-n_iter <- 5
-n_years <- 25 
 
 # base maturity
 # duplicate the biological maturity for this test case, also add necessary parameters
-bio_mat <- func_mat <-  matrix(rep(data$maa, n_years), ncol = n_years)
 data$wt_mature_f = data$wt_mature
 pars$log_F50_f = pars$log_F40_f = pars$log_F35_f = 0
 
