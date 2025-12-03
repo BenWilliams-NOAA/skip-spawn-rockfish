@@ -15,8 +15,8 @@ skip <- readRDS(here::here("data", "skip.RDS"))
 data$wt_mature_f = data$waa * 0.5 * skip
 
 # globals ----
-n_iter <- 15
-n_years <- 35 
+n_iter <- 50
+n_years <- 50 
 bio_mat <- matrix(rep(data$maa, n_years), ncol = n_years)
 func_mat = matrix(rep(skip, n_years), ncol = n_years)
 # recruitment matrix
@@ -34,9 +34,10 @@ saveRDS(sim2, here::here("output", "sim2.RDS"))
 saveRDS(s2, here::here("output", "s2.RDS"))
 
 # save results
-plot_mgmt(s2)
-plot_risk(s2)
-table_risk(s2)
+plot_risk(s2, ssb_col = "spawn_bio_r", bio_ref_col = "B35", F_col = "F35", rmv_yrs = 0) # mgmt view
+plot_risk(s2, rmv_yrs = 0) # reality view
+table_risk(s2, ssb_col = "spawn_bio_r", bio_ref_col = "B35", F_col = "F35", rmv_yrs = 0) # mgmt view
+table_risk(s2, rmv_yrs = 0)
 plot_F_shock(rpt, s2)
 plot_ssb_shock(rpt, s2)
 plot_catch(rpt, s2)
