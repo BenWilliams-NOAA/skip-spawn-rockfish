@@ -10,10 +10,10 @@ run_model <- function(obj_f, data, pars, map_list) {
        pars = obj$env$parList())
 }
 
-project_step <- function(N, F, M, sel, R0) {
+project_step <- function(N, F, M, slx, R0) {
   # project population one time step
   n_age = length(N)
-  Z <- M + F * sel
+  Z <- M + F * slx
   S <- exp(-Z)
   
   # calculate next N
@@ -24,7 +24,7 @@ project_step <- function(N, F, M, sel, R0) {
   N_next[n_age] = N[n_age-1] * S[n_age-1] + N[n_age] * S[n_age]
   
   # catch in numbers
-  C = (F * sel / Z) * N * (1-S)
+  C = (F * slx / Z) * N * (1-S)
   
   list(N = N_next, C = C, Z = Z)
 }
@@ -85,10 +85,10 @@ mismatch_iter <- function(i, rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
       
       if(s=="i") {
         ssb_est = as.numeric(tail(rpt$spawn_bio_f, 1))
-        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40_f), as.numeric(rpt$F40_f)) # * .4 add this in if want things similar to current fishery
+        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B50_f), as.numeric(rpt$F50_f)) # * .4 add this in if want things similar to current fishery
       } else {
         ssb_est = as.numeric(tail(rpt$spawn_bio, 1))
-        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40), as.numeric(rpt$F40)) # * .4 add this in if want things similar to current fishery
+        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B50), as.numeric(rpt$F50)) # * .4 add this in if want things similar to current fishery
       }
       
       # project population
@@ -373,68 +373,59 @@ flexi_curve <- function(age, skip, smin, smax, type = 'dome', skew = 0, width = 
   }
 }
 
-# self testing ----
-verify_mechanics <- function(rpt, project_step_func) {
+self_test <- function(rpt, step_func) {
   
   n_ages = nrow(rpt$Nat)  
   n_years = ncol(rpt$Nat)
   
-  # historical drivers
-  hist_N_init = rpt$Nat[, 1] # initial population vector
+  hist_N_init = rpt$Nat[, 1] # init numbers at age
   hist_rec = rpt$recruits # historical recruitment
   hist_F = rpt$Ft # historical F
   hist_M = rpt$M # natural mortality
-  hist_sel = rpt$slx[, 1] # fishery selectivity (use col 1)
-  
-  # biology 
-  waa <- rpt$waa 
-  wt_mature <- rpt$wt_mature
+  hist_slx = rpt$slx[, 1] # fishery selectivity (use col 1)
+  wt_mature = rpt$wt_mature # waa * maa * 0.5
   
   # containers
-  replay_N <- matrix(NA, nrow = n_ages, ncol = n_years)
-  replay_SSB <- numeric(n_years)
+  new_N = matrix(NA, nrow = n_ages, ncol = n_years)
+  new_SSB = numeric(n_years)
   
   # initialize 
-  replay_N[, 1] <- hist_N_init
+  new_N[, 1] = hist_N_init
   
   # loop up to n-1, project_step calculates t+1
   for (y in 1:(n_years - 1)) {
     
     # calculate SSB for year y (before projection)
     # check if inputs are vectors (static) or matrices (time-varying)
-    waa_y <- if(is.matrix(waa)) waa[, y] else waa
-    mat_y <- if(is.matrix(wt_mature)) wt_mature[, y] else wt_mature
-    
-    spawn_adj <- exp(-hist_M)^(rpt$spawn_fract)
+    mat_y = if(is.matrix(wt_mature)) wt_mature[, y] else wt_mature
+    spawn_adj = exp(-hist_M)^(rpt$spawn_fract)
     
     # calculate SSB
-    replay_SSB[y] <- sum(replay_N[, y] * mat_y * spawn_adj) 
+    new_SSB[y] = sum(new_N[, y] * mat_y * spawn_adj) 
     
     # run the projection step
     # Note: R0 usually fills the FIRST age of the NEXT year
     # grab recruits[y+1] because that is the recruitment resulting from this step
-    step <- project_step_func(N = replay_N[, y],
-                              F = hist_F[y],
-                              M = hist_M,
-                              sel = hist_sel,
-                              R0 = hist_rec[y+1])
+    step = step_func(N = new_N[, y],
+                    F = hist_F[y],
+                    M = hist_M,
+                    slx = hist_slx,
+                    R0 = hist_rec[y+1])
     
-    replay_N[, y+1] <- step$N
+    new_N[, y+1] = step$N
   }
   
   # final year SSB
-  y_final <- n_years
-  waa_last <- if(is.matrix(waa)) waa[, y_final] else waa
-  mat_last <- if(is.matrix(wt_mature)) wt_mature[, y_final] else wt_mature
+  mat_last = if(is.matrix(wt_mature)) wt_mature[, n_years] else wt_mature
   
-  replay_SSB[y_final] <- sum(replay_N[, y_final] *  mat_last * spawn_adj)
+  new_SSB[n_years] = sum(new_N[, n_years] *  mat_last * spawn_adj)
   
   # compare
-  df <- data.frame(year = rpt$years,
-                   report_SSB = rpt$spawn_bio, 
-                   replay_SSB = replay_SSB) %>%
-    mutate(diff = replay_SSB - report_SSB,
+  data.frame(year = rpt$years,
+             report_SSB = rpt$spawn_bio, 
+             new_SSB = new_SSB) %>%
+    mutate(diff = new_SSB - report_SSB,
            percent_error = round((diff / report_SSB) * 100, 5)) 
   
-  return(df)
 }
+
