@@ -6,10 +6,11 @@
 
 # load ----
 source(here::here("R", "utils.R"))
+source(here::here("R", "functions.R"))
 source(here::here("R", "em.R"))
 # data ----
-data <- readRDS(here::here("data", "dat.RDS"))
-pars <- readRDS(here::here("data", "pars.RDS"))
+data <- readRDS(here::here("data", "goa_nork_dat.RDS"))
+pars <- readRDS(here::here("data", "goa_nork_pars.RDS"))
 
 # base maturity
 # duplicate the biological maturity for this test case, also add necessary parameters
@@ -28,13 +29,16 @@ fit = nlminb(start = obj$par,
 rpt <- obj$report(obj$env$last.par.best)
 
 # check mechanics of project_step
-test_project <- verify_mechanics(rpt, project_step)
+test_project <- self_test(rpt, project_step)
 
 test_project %>% 
-  # filter(year!=2024) %>% 
-  ggplot(aes(x = year)) +
-  geom_line(aes(y = report_SSB, color = "Original")) +
-  geom_line(aes(y = replay_SSB, color = "MSE"), linetype = "dashed") +
-  labs(title = "project_step verification",
-       y = "Spawning Biomass", 
-       x = "Year", color = "Source")
+  pivot_longer(c(report_SSB, new_SSB)) %>% 
+  mutate(name = case_when(name=="report_SSB" ~ "Original",
+                          TRUE ~ "Simulated")) %>% 
+  ggplot(aes(year, value, color = name, linetype = name)) + 
+  geom_line(linewidth = 1) +
+  labs(title = "Model verification",
+       y = "Spawning biomass (t)", 
+       x = "Year") +
+  scale_color_scico_d(palette = 'roma')
+  
