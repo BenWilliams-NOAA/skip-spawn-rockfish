@@ -9,14 +9,14 @@ source(here::here("R", "functions.R"))
 source(here::here("R", "hcr.R"))
 
 # data ----
-data <- readRDS(here::here("data", "dat.RDS"))
+data <- readRDS(here::here("data", "goa_nork_dat.RDS"))
 rpt <- readRDS(here::here("output", "rpt.RDS"))
 skip <- readRDS(here::here("data", "skip.RDS"))
 data$wt_mature_f = data$waa * 0.5 * skip
 
 # globals ----
 n_iter <- 50
-n_years <- 50 
+n_years <- 100 
 bio_mat <- matrix(rep(data$maa, n_years), ncol = n_years)
 func_mat = matrix(rep(skip, n_years), ncol = n_years)
 # recruitment matrix
@@ -32,6 +32,7 @@ sim2 = omem_parallel(rpt, data, bio_mat, func_mat, rec_matrix, obj_f = f1)
 s2 <- extract_results(sim2)
 saveRDS(sim2, here::here("output", "sim2.RDS"))
 saveRDS(s2, here::here("output", "s2.RDS"))
+s2 = readRDS(here::here("output", "s2.RDS"))
 
 # save results
 plot_risk(s2, ssb_col = "spawn_bio_r", bio_ref_col = "B35", F_col = "F35", rmv_yrs = 0) # mgmt view
@@ -42,3 +43,14 @@ plot_F_shock(rpt, s2)
 plot_ssb_shock(rpt, s2)
 plot_catch(rpt, s2)
 plot_recruits(rpt, s2)
+plot_management_divergence(s2, rmv_yrs = 0)
+calc_risk_prob(s2, rmv_yrs = 15)
+plot_risk_worms(s2, rmv_yrs = 0)
+calc_bias(s2)
+plot_management_divergence(s2, rmv_yrs = 0)
+
+# Run the calculation
+calc_risk_prob(s2, rmv_yrs = 0)
+
+# Run the plot
+plot_risk_worms(s2)

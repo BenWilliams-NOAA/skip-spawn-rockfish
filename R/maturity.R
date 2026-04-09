@@ -17,7 +17,7 @@ library(readxl)
 library(tidytable)
 library(ggplot2)
 library(mgcv)
-
+theme_set(afscassess::theme_report())
 # current maturity estimate
 og = read_xlsx(here::here("data", "Conrath.xlsx"), sheet = "orig")
 og %>%
@@ -89,18 +89,25 @@ data.frame(age = 2:51) %>%
 
 dat1 %>% pull(functional) -> skip
 saveRDS(skip, here::here("data", "skip.RDS"))
+font_import(pattern = "times")
+loadfonts(device = "win")
+windowsFonts(Times=windowsFont("TT Times New Roman"))
 
-dat1 %>% 
+p = dat1 %>% 
   pivot_longer(-age, names_to = "Model") %>% 
+  mutate(Model = case_when(Model=="skip" ~ "skip spawning",
+                           TRUE ~ Model)) %>% 
   ggplot(aes(age, value, color = Model)) + 
   annotate("rect", xmin = 0, xmax = 11.5, ymin = 0, ymax = 1, 
            fill = "gray", alpha = 0.3) +
   geom_line() +
-  scico::scale_color_scico_d(palette = 'roma') +
-  afscassess::theme_report(base_size = 16) +
+  scico::scale_color_scico_d(palette = 'grayC', end = 0.8) +
+  # afscassess::theme_report(base_size = 16) +
   theme(legend.position = c(0.8, 0.4)) +
   xlab("Age") +
-  ylab("Proportion mature")
-  
+  ylab("Proportion") +
+  tickr::scale_x_tickr(data=dat1, var = age, var_min=0)
+
+ggsave(here::here("figs", "maturity.png"), p, grDevices::png, width = 7.5, height = 5.5, dpi = 200)
 
 

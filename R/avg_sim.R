@@ -1,8 +1,8 @@
-# notes ----
-# high recruitment from recruit timeseries
-# observed skip spawning
-
-# load ----
+#notes ----
+  # avg recruitment from recruit timeseries
+  # observed skip spawning
+  
+  # load ----
 source(here::here("R", "utils.R"))
 source(here::here("R", "em.R"))
 source(here::here("R", "functions.R"))
@@ -26,7 +26,7 @@ expand.grid(age = 1:max_age,
          skewed_dome = mapply(flexi_curve, age, skip, smin, smax, 'skewed_dome', skew=1.5),
          increasing = mapply(flexi_curve, age, skip, smin, smax, 'increase'),
          decreasing = mapply(flexi_curve, age, skip, smin, smax, 'decrease'),
-         inverse_dome = mapply(flexi_curve, age, skip, smin, smax, 'inverse_dome', skew = 0.2),
+         inverse_dome = mapply(flexi_curve, age, skip, smin, smax, 'inverse_dome'),
          constant = ifelse(age %in% smin:smax, skip, 0)) -> p_skip
 
 skip =  (1 -( p_skip %>% filter(skip==.3) %>% pull(skewed_dome) )) * data$maa
@@ -42,7 +42,7 @@ set.seed(309)
 rec_matrix <- matrix(c(rlnorm(n_iter * collapse, 
                               quantile(log(rpt$recruits), 0.05), 0.1),
                        rlnorm(n_iter * (n_years - collapse), 
-                              quantile(log(rpt$recruits), 0.8), 0.2)),
+                              quantile(log(rpt$recruits), 0.5), 0.2)),
                      nrow = n_iter, ncol = n_years)
 
 shapes <- c("dome", "skewed_dome", "inverse_dome", "increasing", "decreasing", "constant")
@@ -68,10 +68,9 @@ for (shp in shapes) {
     s_res = extract_results(sim_res)
     
     # results
-    saveRDS(sim_res, here::here("output", paste0("high_sim_", run_id, ".RDS")))
-    saveRDS(s_res, here::here("output", paste0("high_res_", run_id, ".RDS")))
+    saveRDS(sim_res, here::here("output", paste0("avg_sim_", run_id, ".RDS")))
+    saveRDS(s_res, here::here("output", paste0("avg_res_", run_id, ".RDS")))
     gc()
     gc()
   }
 }
-

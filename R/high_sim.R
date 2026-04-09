@@ -11,12 +11,10 @@ source(here::here("R", "hcr.R"))
 # data ----
 data <- readRDS(here::here("data", "goa_nork_dat.RDS"))
 rpt <- readRDS(here::here("output", "rpt.RDS"))
-# skip <- readRDS(here::here("data", "skip.RDS"))
-# data$wt_mature_f = data$waa * 0.5 * skip
 
 # globals ----
 max_age = length(rpt$waa)
-skip_levels = c(0.1, 0.2, 0.3)
+skip_levels = c(0.02, 0.05, 0.1, 0.2, 0.3)
 smin = 3
 smax = 50
 
@@ -33,7 +31,7 @@ skip =  (1 -( p_skip %>% filter(skip==.3) %>% pull(skewed_dome) )) * data$maa
 data$wt_mature_f = data$waa * 0.5 * skip
 
 n_iter <- 50
-n_years <- 100 
+n_years <- 50 
 bio_mat <- matrix(rep(data$maa, n_years), ncol = n_years)
 func_mat = matrix(rep(skip, n_years), ncol = n_years)
 # recruitment matrix
@@ -74,4 +72,3 @@ for (shp in shapes) {
     gc()
   }
 }
-

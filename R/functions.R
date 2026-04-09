@@ -85,10 +85,10 @@ mismatch_iter <- function(i, rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
       
       if(s=="i") {
         ssb_est = as.numeric(tail(rpt$spawn_bio_f, 1))
-        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B50_f), as.numeric(rpt$F50_f)) # * .4 add this in if want things similar to current fishery
+        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40_f), as.numeric(rpt$F40_f)) 
       } else {
         ssb_est = as.numeric(tail(rpt$spawn_bio, 1))
-        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B50), as.numeric(rpt$F50)) # * .4 add this in if want things similar to current fishery
+        F_targets[[s]] = tier_3(ssb_est, as.numeric(rpt$B40), as.numeric(rpt$F40)) 
       }
       
       # project population
@@ -264,7 +264,6 @@ extract_results <- function(res_list, start_year = NULL) {
         })
       }
       
-      # --- NEW Helper 2: For Vector Terminal Values (Ft) ---
       # This extracts the LAST value of the vector for the current year
       extract_terminal <- function(var_name) {
         map_dbl(rpt_list, function(x) {
@@ -278,11 +277,13 @@ extract_results <- function(res_list, start_year = NULL) {
       }
       
       # Extract Variables
+      ts_B0_f <- extract_scalar("B0_f")
       ts_B35 <- extract_scalar("B35_f")
       ts_F35 <- extract_scalar("F35_f")
       ts_B40 <- extract_scalar("B40_f")
       ts_F40 <- extract_scalar("F40_f")
       
+      B0  <- extract_scalar("B0")
       B35 <- extract_scalar("B35")
       F35 <- extract_scalar("F35")
       B40 <- extract_scalar("B40")
@@ -315,13 +316,16 @@ extract_results <- function(res_list, start_year = NULL) {
         F_target_val = proj$target_F,
         
         # Reference Points
+        B0 = B0,
         B35 = B35,
         F35 = F35,
         B40 = B40,
         F40 = F40,
         
-        B35_f = ts_B35,
+        # Functional Reference Points
+        B0_f = ts_B0_f,
         F35_f = ts_F35,
+        B35_f = ts_B35,
         B40_f = ts_B40,
         F40_f = ts_F40,
         
@@ -334,7 +338,10 @@ extract_results <- function(res_list, start_year = NULL) {
   return(out)
 }
 
-flexi_curve <- function(age, skip, smin, smax, type = 'dome', skew = 0, width = 4) {
+flexi_curve <- function(age, skip, smin, smax, type = 'dome', skew = 0, width = 4, shift = 0) {
+  
+  age <- age + shift
+  
   # Return 0 for ages outside the [smin, smax] range
   if (age < smin || age > smax) {
     return(0)
@@ -359,7 +366,10 @@ flexi_curve <- function(age, skip, smin, smax, type = 'dome', skew = 0, width = 
     # Rescale skewed dome back to original scale (optional)
     skewed_value <- dome_value * skew_modifier * 2  # *2 to re-normalize the 0-1 logistic range to 0-2
     return(max(0, min(skewed_value, skip)))
-    
+  } else if (type == 'inverse_dome') {  
+    scaling = 1 - skew
+    gaussian = exp(-((age - midpoint) / spread)^2)
+    return(skip * (1 - (scaling * gaussian)))
   } else if (type == 'increase') {
     # Linearly increasing curve from smin to smax
     return(skip * (age - smin) / (smax - smin))
