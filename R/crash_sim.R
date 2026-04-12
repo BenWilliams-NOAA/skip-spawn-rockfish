@@ -49,7 +49,7 @@ rec_matrix <- matrix(c(rlnorm(n_iter * collapse,
                      nrow = n_iter, ncol = n_years)
 
 shapes <- c("dome", "skewed_dome", "inverse_dome", "increasing", "decreasing", "constant")
-
+shapes = "constant"
 for (shp in shapes) {
   for (lvl in skip_levels) {
     run_id <- paste0(shp, "_", lvl) # e.g., "dome_0.02"
