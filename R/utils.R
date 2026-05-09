@@ -4,6 +4,7 @@ library(foreach)
 library(doParallel)
 library(RTMB)
 library(scico)
+library(doRNG)
 # remotes::install_git("BenWilliams-NOAA/afscassess")
 theme_set(afscassess::theme_report())
 library(ggpubr)
@@ -205,68 +206,106 @@ calc_bias <- function(sims, rmv_yrs = 0) {
     filter(scenario == "ii")
 
 }
+# relative difference
+# est / obs - 1
+# F test
+# B test
+
+rel_dif <- function(est, obs) {
+  est / obs - 1
+}
+calc_pm <- function(sims, rmv_yrs = 0) {
+  sims %>%
+    filter(year >= (min(year) + rmv_yrs)) %>%
+    # Critical: Ensure data is sorted by year so diff() and last() work correctly
+    arrange(scenario, iteration, year) %>%
+    
+    # 1. Summarize ACROSS years to get 1 row per iteration & scenario
+    group_by(scenario, iteration) %>%
+    summarise(
+      prob_F_excess = mean(Ft > F35_f, na.rm = TRUE),
+      prob_SSB_low  = mean(spawn_bio_f < B35_f, na.rm = TRUE),
+      term_OFG      = last(Ft) / last(F35_f),
+      term_OFD      = last(spawn_bio_f) / last(B35_f),
+      aacv          = sum(abs(diff(catch)), na.rm = TRUE) / sum(head(catch, -1), na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    
+    # 2. Pivot wider so baseline (i) and mis-specified (ii) are side-by-side
+    pivot_wider(
+      names_from = scenario, 
+      values_from = c(prob_F_excess, prob_SSB_low, term_OFG, term_OFD, aacv)
+    ) %>%
+    
+    # 3. Calculate Relative Differences (rd)
+    mutate(
+      rd_prob_F_excess = rel_dif(prob_F_excess_ii, prob_F_excess_i),
+      rd_prob_SSB_low  = rel_dif(prob_SSB_low_ii, prob_SSB_low_i),
+      rd_term_OFG      = rel_dif(term_OFG_ii, term_OFG_i),
+      rd_term_OFD      = rel_dif(term_OFD_ii, term_OFD_i),
+      rd_aacv          = rel_dif(aacv_ii, aacv_i)
+    )
+}
+
+# relative_diff_results <- raw_metrics %>%
+#   pivot_wider(
+#     names_from = scenario, 
+#     values_from = c(prob_F_excess, prob_SSB_low, term_OFG, term_OFD, aacv)
+#   ) %>%
+#   mutate(
+#     # Apply the rel_dif function (Scenario II = est, Scenario I = obs)
+#     rd_prob_F_excess = rel_dif(prob_F_excess_ii, prob_F_excess_i),
+#     rd_prob_SSB_low  = rel_dif(prob_SSB_low_ii, prob_SSB_low_i),
+#     rd_term_OFG      = rel_dif(term_OFG_ii, term_OFG_i),
+#     rd_term_OFD      = rel_dif(term_OFD_ii, term_OFD_i),
+#     rd_aacv          = rel_dif(aacv_ii, aacv_i)
+#   )
+
+# all_in %>%
+#   # Group by the simulation parameters so we get one row per iteration/scenario
+#   group_by(skip, skip_shape, recruitment, iteration, scenario) %>%
+#   summarise(
+#     # 1. Probability of F > Fmsy (Proxy: F35_f)
+#     prob_F_excess = mean(Ft > F35_f, na.rm = TRUE),
+    
+#     # 2. Probability of SSB < SSBmsy (Proxy: B35_f)
+#     prob_SSB_low = mean(spawn_bio_f < B35_f, na.rm = TRUE),
+    
+#     # 3. Terminal Overfishing Status (F_T / Fmsy_T)
+#     term_OFG = last(Ft) / last(F35_f),
+    
+#     # 4. Terminal Overfished Status (SSB_T / SSBmsy_T)
+#     term_OFD = last(spawn_bio_f) / last(B35_f),
+    
+#     # 5. Average Annual Catch Variation (AACV)
+#     # diff(catch) handles Catch_y - Catch_{y-1}
+#     # head(catch, -1) handles Catch_{y-1} for the denominator
+#     aacv = sum(abs(diff(catch)), na.rm = TRUE) / sum(head(catch, -1), na.rm = TRUE),
+    
+#     .groups = "drop"
+#   )
+
+
 
 calc_bias2 <- function(sims, rmv_yrs = 0) {
   
-  sims %>%
+  	sims %>% 
     filter(year >= (min(year) + rmv_yrs)) %>%
-    mutate(true_intensity = Ft / F35_f) %>%
-    summarise(
-      mean_intensity = mean(true_intensity, na.rm = TRUE),
-      median_intensity = median(true_intensity, na.rm = TRUE),
-      .by = c(scenario, year, iteration)
-    ) %>%
-    mutate(
-      bias_pct = (mean_intensity - mean_intensity[scenario == "i"]) / 
-        mean_intensity[scenario == "i"] * 100,
-    ) %>% 
-    filter(scenario == "ii")
-  
+    mutate(intensity = spawn_bio_f / B35_f,
+  				 crash = spawn_bio_f / ( B0_f * 0.2),
+  				 Fs = Ft / F35_f,
+           ssb_error = (spawn_bio_r - spawn_bio_f) / spawn_bio_f * 100,
+           ssb_diff = spawn_bio_r / spawn_bio_f,
+           F_diff = Ft / F40_f,
+           B35_test = if_else(spawn_bio_f < B35_f, 1, 0),
+           F35_test = if_else(Ft > F35_f, 1, 0),
+           crash_test = if_else(crash > ( B0_f * 0.2), 1, 0)) %>%
+    select(scenario, year, iteration, intensity, ssb_error, Fs, ssb_diff, F_diff, B35_test, F35_test, catch, crash_test) %>%
+    pivot_wider(names_from = scenario, values_from = c(intensity, ssb_error, ssb_diff, Fs, F_diff, B35_test, F35_test, catch, crash_test)) %>%
+    mutate( bias_pct = (intensity_ii - intensity_i) / intensity_i * 100 ,
+  				crash_pct = (crash_test_ii - crash_test_i) / crash_test_i * 100 ,
+            F_bias_pct = (Fs_ii - Fs_i) / Fs_i * 100 )  
 }
-
-
-# calc_bias2(s1) %>% 
-#   mutate(recruits = "average") %>% 
-#   bind_rows(calc_bias2(s2) %>% 
-#   mutate(recruits = "high")) %>% 
-#   bind_rows(calc_bias2(s3) %>% 
-#   mutate(recruits = "crash")) %>% 
-#   ggplot(aes(year, bias_pct, group = interaction(iteration, recruits), color = recruits)) + 
-#            # geom_line(alpha = 0.00) +
-#   geom_hline(yintercept = 0, lty = 3)  +
-#   stat_summary(aes(group = recruits), fun.y = median, geom = "line", size = 1) +
-#   scico::scale_color_scico_d(palette = 'roma', end = 0.7) +
-#   coord_cartesian(ylim = c(-10, 30))
-
-# calc_bias2(avg_res_constant_0.3) %>% 
-#   mutate(recruits = "average") %>% 
-#   bind_rows(calc_bias2(high_res_constant_0.3) %>% 
-#               mutate(recruits = "high")) %>% 
-#   bind_rows(calc_bias2(crash_res_constant_0.3) %>% 
-#               mutate(recruits = "crash")) %>% 
-#   ggplot(aes(year, bias_pct, group = interaction(iteration, recruits), color = recruits)) + 
-#   geom_line() +
-#   geom_hline(yintercept = 0, lty = 3) 
-
-
-# (calc_bias2(s1) %>% 
-#   ggplot(aes(year, bias_pct, group = iteration)) + 
-#   geom_line(alpha = 0.2) +
-#   geom_hline(yintercept = 0, lty = 3) +
-#   stat_summary(aes(group = 1), fun.y = median, geom = "line", size = 1)) / 
-# 
-# (calc_bias2(s2) %>% 
-#   ggplot(aes(year, bias_pct, group = iteration)) + 
-#   geom_line(alpha = 0.2) +
-#   geom_hline(yintercept = 0, lty = 3) +
-#   stat_summary(aes(group = 1), fun.y = median, geom = "line", size = 1)) /
-#   
-#   (calc_bias2(s3) %>% 
-#      ggplot(aes(year, bias_pct, group = iteration)) + 
-#      geom_line(alpha = 0.2) +
-#      geom_hline(yintercept = 0, lty = 3) +
-#      stat_summary(aes(group = 1), fun.y = median, geom = "line", size = 1)) +
-#   plot_layout(axis = 'collect') 
 
 plot_management_divergence <- function(sims, rmv_yrs = 0) {
   
@@ -362,7 +401,7 @@ plot_risk_worms <- function(sims, rmv_yrs = 0) {
     summarise(severity_score = sum(ifelse(status == "Critical (< B20)", 10, 
                                           ifelse(status == "Overfished (< B35)", 1, 0))), 
               .by = c(scenario, iteration)) %>%
-      mutate(iter_rank = row_number(), .by = scenario) %>% 
+      mutate(iter_rank = dplyr::row_number(), .by = scenario) %>% 
     arrange(iter_rank)
   
   df_plot <- df %>%
@@ -372,7 +411,7 @@ plot_risk_worms <- function(sims, rmv_yrs = 0) {
     geom_raster() + # Raster is faster than tile for large grids
     scale_fill_manual(values = c("Safe (> B35)" = "#b8de64",       # Pale Green
                                  "Overfished (< B35)" = "#E3AF27", # Orange
-                                 # "Approaching Overfished" = "#f3cb7c" ,
+                                 "Approaching Overfished" = "#f3cb7c" ,
                                  "Overfishing (> F35)" = "#f5f77c",
                                  "High Risk (<B35 & >F35)" = "#a50f15")) + # Deep Red
     facet_wrap(~scenario_label) +
@@ -387,47 +426,33 @@ plot_risk_worms <- function(sims, rmv_yrs = 0) {
     ) 
 }
 
-summarise_performance <- function(sims, rmv_yrs = 0) {
+summarise_performance <- function(sims, rmv_yrs = 0, yrs = 1:100) {
   require(tidytable)
   
   sims %>%
-    filter(year >= (min(year) + rmv_yrs)) %>%
-    # Calculate AAV (Average Annual Variability in Catch) per iteration first
+    filter(year >= (min(year) + rmv_yrs),
+            year %in% yrs) %>%
+    # aav (average annual variability in Catch) per iteration 
     arrange(scenario, iteration, year) %>% 
-    mutate(
-      catch_diff = abs(catch - lag(catch)),
-      # Avoid division by zero if catch is 0
-      catch_lag = ifelse(lag(catch) == 0, 0.001, lag(catch)), 
-      ann_var = catch_diff / catch_lag
-    ) %>%
-    summarise(
-      # --- Yield Metrics ---
-      avg_catch = mean(catch),
+    mutate(catch_diff = abs(catch - lag(catch)),
+		       catch_lag = ifelse(lag(catch) == 0, 0.001, lag(catch)), 
+      			ann_var = catch_diff / catch_lag) %>%
+    summarise(avg_catch = mean(catch),
       median_catch = median(catch),
-      
-      # --- Stability Metrics (AAV) ---
-      # Mean of the annual % change in catch
       catch_cv = mean(ann_var, na.rm = TRUE), 
-      
-      # --- Status Metrics (True Functional Reality) ---
-       # avg_depletion = mean(spawn_bio_f / B0_f), # Relative to Virgin
-
-      # --- Risk Probability ---
-      # Prob SSB < True B35
+      avg_depletion = mean(spawn_bio_f / B0_f), # relative to virgin
       risk_b35 = mean(spawn_bio_f < B35_f),
-      # Prob SSB < True B20 (Severe Depletion)
       risk_b20 = mean(spawn_bio_f < (B35_f * (20/35))),
-      
-      .by = c(scenario)
-    ) %>%
+      risk_f35 = mean(Ft > F35_f),
+      .by = c(scenario)) %>%
     mutate(
-      scenario_label = ifelse(scenario == "i", "Correct (Functional)", "Misspecified (Biological)"),
-      # Format percentages for readability
-      catch_cv_pct = paste0(round(catch_cv * 100, 1), "%"),
-      risk_b35_pct = paste0(round(risk_b35 * 100, 1), "%"),
-      risk_b20_pct = paste0(round(risk_b20 * 100, 1), "%")
+      scenario = ifelse(scenario == "i", "Correct (Functional)", "Misspecified (Biological)"),
+      catch_cv_pct = paste0(round(catch_cv * 100, 2), "%"),
+      risk_b35_pct = paste0(round(risk_b35 * 100, 2), "%"),
+      risk_b20_pct = paste0(round(risk_b20 * 100, 2), "%"),
+      risk_f35_pct = paste0(round(risk_f35 * 100, 2), "%")
     ) %>%
-    select(scenario_label, avg_catch, catch_cv_pct,  risk_b35_pct, risk_b20_pct)
+    select(scenario, avg_catch, median_catch, catch_cv_pct,  risk_b35_pct, risk_b20_pct, risk_f35_pct)
 }
 
 calc_estimation_error <- function(sims, rmv_yrs = 0) {
@@ -496,13 +521,11 @@ calc_rebuilding <- function(sims, rmv_yrs = 0, time_frame = 10) {
     summarise(
       yr_crashed = first(yr_crashed_temp),
       yr_recovered = as.numeric(suppressWarnings(min(year[year > first(yr_crashed_temp) & is_rebuilt], na.rm = TRUE))),
-      .by = c(scenario, iteration)
-    ) %>%
+      .by = c(scenario, iteration) ) %>%
     mutate(
       # Use NA_real_ to maintain the numeric/double column type
       yr_crashed = ifelse(is.infinite(yr_crashed), NA_real_, yr_crashed),
       yr_recovered = ifelse(is.infinite(yr_recovered), NA_real_, yr_recovered),
-      
       time_to_rebuild = yr_recovered - yr_crashed,
       rebuilt_in_time = ifelse(!is.na(time_to_rebuild) & time_to_rebuild <= time_frame, 1, 0)
     ) %>%
@@ -529,19 +552,15 @@ calc_rebuilding <- function(sims, rmv_yrs = 0, time_frame = 10) {
 plot_tradeoff_frontier <- function(sims, rmv_yrs = 0) {
   
   # Calculate Risk and Yield per iteration
-  tradeoff_data <- sims %>%
+  s1 %>%
     filter(year >= (min(year) + rmv_yrs)) %>%
     summarise(
       avg_catch = mean(catch, na.rm = TRUE),
-      # Risk: Probability of severe depletion (using B20 as a hard limit proxy)
-      risk_b20 = mean(spawn_bio_f < (B35_f * (20/35)), na.rm = TRUE), 
-      .by = c(scenario, iteration)
-    ) %>%
-    mutate(scenario_label = ifelse(scenario == "i", "Correct (Functional)", "Misspecified (Biological)"))
-  
-  ggplot(tradeoff_data, aes(risk_b20, avg_catch, color = scenario_label)) +
-    # Plot individual iterations as transparent points
-    geom_point(alpha = 0.5, size = 2) +
+      risk_b20 = mean(spawn_bio_f < (B35_f ), na.rm = TRUE), 
+      .by = c(scenario, iteration) ) %>%
+    mutate(scenario_label = ifelse(scenario == "i", "Correct (Functional)", "Misspecified (Biological)")) %>% 
+    ggplot( aes(risk_b20, avg_catch, color = scenario_label)) +
+    geom_point(alpha = 0.5) +
     # Add 95% confidence ellipses to show the spread/variance
     stat_ellipse(level = 0.95, linetype = "dashed", alpha = 0.7) + 
     # Add a large diamond centroid for the overall scenario mean
@@ -553,14 +572,65 @@ plot_tradeoff_frontier <- function(sims, rmv_yrs = 0) {
     scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
     labs(
       title = "Management Trade-off Frontier",
-      subtitle = "Average Yield vs. Biological Risk (50 Iterations)",
-      x = "Probability of Severe Depletion (True SSB < B20)",
+      subtitle = "Average Yield vs. Biological Risk (100 Iterations)",
+      x = "Probability of Depletion (True SSB < B35)",
       y = "Average Annual Catch",
       color = "Management Scenario"
     ) +
     # theme_bw() +
     theme(legend.position = "top")
 }
+
+plot_tradeoff_frontier_grid <- function(sims, rmv_yrs = 0) {
+  
+  sims %>%
+    filter(year >= (min(year) + rmv_yrs)) %>%
+    # Calculate Risk and Yield per iteration, per experimental factor
+    summarise(
+      avg_catch = mean(catch, na.rm = TRUE),
+      # Risk: Probability of dropping below target biomass
+      risk_b35 = mean(spawn_bio_f < B35_f, na.rm = TRUE), 
+      .by = c(recruitment, skip_shape, scenario, iteration) 
+    ) %>%
+    mutate(
+      scenario_label = ifelse(scenario == "i", "Correct (Functional)", "Misspecified (Biological)")
+    ) %>% 
+    
+    # Plotting
+    ggplot(aes(risk_b35, avg_catch, color = scenario_label)) +
+    
+    # 1. Individual iterations
+    geom_point(alpha = 0.5) +
+    
+    # 2. Confidence ellipses (suppress warnings if some facets have too little variance to draw an ellipse)
+    stat_ellipse(level = 0.95, linetype = "dashed", alpha = 0.7) + 
+    
+    # 3. The bordered centroids
+    stat_summary(fun = mean, geom = "point", shape = 18, color = "black") +
+    stat_summary(fun = mean, geom = "point", shape = 18, aes(color = scenario_label)) +
+    
+    # 4. The Grid!
+    facet_grid(recruitment ~ skip_shape, scales = "free") +
+    
+    # Aesthetics
+    scale_color_manual(values = c("Correct (Functional)" = "steelblue", 
+                                  "Misspecified (Biological)" = "firebrick")) +
+    scale_x_continuous(labels = scales::percent_format()) +
+    scale_y_continuous(labels = scales::comma) +
+    labs(
+      title = "Management Trade-off Frontier Across All Scenarios",
+      subtitle = "Average Yield vs. Biological Risk (50 Iterations per facet)",
+      x = "Probability of Depletion (True SSB < B35)",
+      y = "Average Annual Catch (t)",
+      color = "Management Scenario"
+    ) +
+    afscassess::theme_report() +
+    theme(legend.position = "top")
+}
+
+# plot_tradeoff_frontier_grid(all_sims)
+# Run it on your combined dataframe:
+# plot_tradeoff_frontier_grid(all_sims)
 # plot_tradeoff_frontier(crash_res_inverse_dome_0.3)
 # plot_tradeoff_frontier(d3)
 # compare_time_blocks(s1)

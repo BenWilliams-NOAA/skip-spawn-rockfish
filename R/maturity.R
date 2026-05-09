@@ -211,14 +211,5 @@ p = d_dat %>%
 ggsave(here::here("figs", "maturity.png"), p, grDevices::png, width = 6.5, height = 5.5, dpi = 200)
 
 
-d_dat %>% 
-  filter(age %in% 4:33) %>% 
-  pull(skip) -> dusk_skip
-
-saveRDS(dusk_skip, here::here("data", "dusk_skip.RDS"))
-
-n_dat %>% 
-  filter(age %in% 2:51) %>% 
-  pull(skip) -> nork_skip
-
-saveRDS(nork_skip, here::here("data", "nork_skip.RDS"))
+saveRDS(d_dat, here::here("data", "d_dat.RDS"))
+saveRDS(n_dat, here::here("data", "n_dat.RDS"))

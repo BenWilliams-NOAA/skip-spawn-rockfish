@@ -197,14 +197,8 @@ mismatch_iter <- function(i, rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
 }
 
 omem_parallel <- function(rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
-  require(doParallel)
-  require(foreach)
-  require(doRNG)
-  require(RTMB) # Make sure RTMB is loaded on workers
-  
+ 
   n_iter = nrow(rec_matrix)
-  cl = parallel::makeCluster(parallel::detectCores()-2)
-  doParallel::registerDoParallel(cl)
   
   # Export necessary functions
   func_exports <- c("mismatch_iter", "cmb", "run_model", "project_step", "tier_3", "f1")
@@ -228,7 +222,7 @@ omem_parallel <- function(rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
                        })
                      }
   
-  parallel::stopCluster(cl)
+
   return(results)
 }
 
@@ -383,6 +377,46 @@ flexi_curve <- function(age, skip, smin, smax, type = 'dome', skew = 0, width = 
   }
 }
 
+run_sims <- function(shapes = c("dome", "skewed_dome", "inverse_dome", "increasing", "decreasing", "constant"), 
+											skip_levels,
+                      rec_type,
+                      sp,
+                      p_skip, rpt, data, bio_mat, rec_matrix, n_years, f1) {
+  
+  cl = parallel::makeCluster(parallel::detectCores() - 2)
+  doParallel::registerDoParallel(cl)
+
+	for (shp in shapes) {
+  	for (lvl in skip_levels) {
+    	run_id = paste0(shp, "_", lvl) # e.g., "dome_0.02"
+    	message(paste("Running simulation for:", run_id))
+    
+    	# extract curve values
+    	current_curve_vals <- p_skip %>% 
+      	filter(skip == lvl) %>% 
+      	pull(all_of(shp))
+        
+      func_mat = bio_mat * (1 - current_curve_vals)
+      
+      for(n in 1:n_years) {
+        current_skip_vec = func_mat[, n]
+        data$wt_mature_f = data$waa * 0.5 * current_skip_vec
+
+    	new_func_mat = matrix(rep(current_skip_vec, n_years), ncol = n_years)
+    
+    	# run model
+    	sim_res = omem_parallel(rpt, data, bio_mat, new_func_mat, rec_matrix, obj_f = f1)
+    	s_res = extract_results(sim_res)
+    	# results
+    	saveRDS(sim_res, here::here("output", paste0(sp, "_", rec_type, "_sim_", run_id, ".RDS")))
+    	saveRDS(s_res, here::here("output", paste0(sp, "_", rec_type, "res_", run_id, ".RDS")))
+  	}
+      }
+  }
+  parallel::stopCluster(cl)
+  
+  }
+
 self_test <- function(rpt, step_func) {
   
   n_ages = nrow(rpt$Nat)  
@@ -438,4 +472,5 @@ self_test <- function(rpt, step_func) {
            percent_error = round((diff / report_SSB) * 100, 5)) 
   
 }
+
 
