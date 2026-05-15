@@ -8,20 +8,20 @@ source(here::here("R", "hcr.R"))
 # data ----
 dusk = readRDS(here::here("data", "dusk.rds"))
 data = dusk$dat
-rpt = dusk$rpt
+rpt = readRDS(here::here("output", "d_rpt.rds"))
 skip <- readRDS(here::here("data", "d_dat.RDS")) %>% 
   filter(age %in% 4:33)
 
 
 # globals ----
 n_iter <- 50
-n_years <- 100 
+n_years <- 100
 bio_mat <- matrix(rep(skip$biological, n_years), ncol = n_years)
 func_mat = matrix(rep(skip$functional, n_years), ncol = n_years)
 
 data$wt_mature_f = data$waa * 0.5 * skip$functional
 max_age = length(data$waa)
-smin = 3
+smin = 4
 smax = 30
 skip_levels = c(0.1, 0.2, 0.3)
 # plot(4:33, (data$waa * 0.5))
@@ -80,10 +80,13 @@ for (shp in shapes) {
     s_res = extract_results(sim_res)
     
     # results
-    saveRDS(sim_res, here::here("output", paste0("dusk_avg_sim_", run_id, ".RDS")))
-    saveRDS(s_res, here::here("output", paste0("dusk_avg_res_", run_id, ".RDS")))
+    saveRDS(sim_res, here::here("output", "dusky", paste0("d_avg_sim_", run_id, ".RDS")))
+    saveRDS(s_res, here::here("output", "dusky",  paste0("d_avg_res_", run_id, ".RDS")))
   }
 }
+
+gc()
+gc()
 
 # high recruitment ----
 # recruitment matrix
@@ -127,11 +130,13 @@ for (shp in shapes) {
     s_res = extract_results(sim_res)
     
     # results
-    saveRDS(sim_res, here::here("output", paste0("dusk_high_sim_", run_id, ".RDS")))
-    saveRDS(s_res, here::here("output", paste0("dusk_high_res_", run_id, ".RDS")))
+    saveRDS(sim_res, here::here("output", paste0("d_high_sim_", run_id, ".RDS")))
+    saveRDS(s_res, here::here("output", paste0("d_high_res_", run_id, ".RDS")))
   }
 }
 
+gc()
+gc()
 # mean/crash/high recruitment ----
 # recruitment matrix
 collapse = 20 # number of years of population collapse (if desired)
@@ -175,10 +180,13 @@ for (shp in shapes) {
     s_res = extract_results(sim_res)
     
     # results
-    saveRDS(sim_res, here::here("output", paste0("dusk_mch_sim_", run_id, ".RDS")))
-    saveRDS(s_res, here::here("output", paste0("dusk_mch_res_", run_id, ".RDS")))
+    saveRDS(sim_res, here::here("output", "dusky", paste0("d_mch_sim_", run_id, ".RDS")))
+    saveRDS(s_res, here::here("output", "dusky", paste0("d_mch_res_", run_id, ".RDS")))
   }
 }
+
+gc()
+gc()
 
 # mean/crash/mean recruitment ----
 # recruitment matrix
@@ -221,7 +229,7 @@ for (shp in shapes) {
     s_res = extract_results(sim_res)
     
     # results
-    saveRDS(sim_res, here::here("output", paste0("dusk_mcm_sim_", run_id, ".RDS")))
-    saveRDS(s_res, here::here("output", paste0("dusk_mcm_res_", run_id, ".RDS")))
+    saveRDS(sim_res, here::here("output", paste0("d_mcm_sim_", run_id, ".RDS")))
+    saveRDS(s_res, here::here("output", paste0("d_mcm_res_", run_id, ".RDS")))
   }
 }
