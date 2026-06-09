@@ -1,5 +1,6 @@
 ---
-title: "Mismatched Maturity: The Sensitivity of the Gulf of Alaska Northern Rockfish Assessment to Unaccounted Skip Spawning"
+title: "The sensitivity of two Gulf of Alaska rockfish assessments to unaccounted skip spawning"
+# alt_title: "Evaluating Bias from Unaccounted Skip Spawning in Gulf of Alaska Northern Rockfish"
 author: 
   - name: Benjamin C. Williams
     email: ben.williams@noaa.gov
@@ -18,8 +19,9 @@ abstract: |
 keywords:
   - skip spawning
   - northern rockfish
+  - dusky rockfish
   - stock assessment
-  - spawning stock biomass
+  - spawning biomass
 
 format:
   elsevier-pdf:
@@ -33,64 +35,98 @@ bibliography: references.bib
 ---
 # Introduction
 
-In data-moderate or data-rich, age-structured fishery stock assessments maturity is typically treated as a determinist and often time invariant input [@Miller2018].
+The determination of fisheries stock status is fundamentally reliant on the ability to estimate current stock size relative to a biological reference point (BRP). 
+While the biomass that supports maximum sustainable yield ($B_{MSY}$) remains the theoretical gold standard for management, the high level of variability inherent in stock-recruitment relationships often makes it impossible to estimate directly. 
+In response, many management jurisdictions such as the North Pacific Fishery Management Council (NPFMC) rely on spawning potential ratio (SPR) proxies [@Goodyear1990] such as $B_{40%}$ in lieu of $B_{MSY}$. 
+In the NPFMC Tier 3 framework, $B_{40%}$ represents the spawning biomass expected to remain under a fishing mortality rate ($F_{40%}$) that reduces the lifetime spawning potential per recruit to 40% of unfished levels.
+
+The integrity of these SPR-based reference points is entirely dependent on the accurate integration of fishery selectiviyt and life-history parameters. 
+While selectivity defines the window of the population vulnerable to harvest, the underlying biological parameters (e.g., natural mortality, weight-at-age, and maturity-at-age) define the stock’s sustainability and recovery potential.
+In most age-structured assessments, reproductive capacity is quantified via the maturity ogive, a deterministic and often time-invariant input that defines the proportion of individuals mature at a given age or length [@Miller2018]. 
+This ogive is typically estimated externally using logistic regression to fit histological or macroscopic data from scientific surveys [@Williams2016]. 
+The resulting spawning stock biomass (SSB) is then calculated as the sum product of the number of females, their weight-at-age, and the proportion mature. 
+This metric relies on the proportionality assumption [@Morgan2008; @Lambert2008], that mature female biomass is linearly related to total egg production and, by extension, the expected recruitment of the stock.
+
+However, the validity of SSB as a proxy for reproductive output depends heavily on how maturity is defined. 
+As highlighted by @Head2020, there is a fundamental distinction between biological maturity and functional maturity. 
+Biological maturity refers to the developmental milestone where an individual becomes physiologically capable of producing gametes. 
+Functional maturity refers to the proportion of those biologically mature individuals that actually contribute to a spawning event in a given year. 
+The discrepancy between these two measures is primarily driven by "skip spawning," a life-history strategy where mature adults forgo reproduction to prioritize somatic growth or survival [@Jorgensen2006; @Secor2008].
+
+Despite its prevalence [@Rideout2011], skip spawning is rarely modeled explicitly in stock assessments. 
+Traditional macroscopic staging often fails to distinguish skip-spawners from immature individuals [@Rodgveller2018; @McBride2022], leading to a "productivity illusion." 
+When an assessment attributes reproductive output to non-spawning individuals, the model observes a high spawning biomass producing only average recruitment. 
+This error propagates through the SPR analysis in two critical ways: the unfished spawning biomass per recruit ($SB_0$) is overestimated, setting an artificially high $B_{40\%}$ target, and it may incorrectly infer that the stock has low intrinsic productivity (e.g., low steepness), leading to biased mortality proxies.
+While it is recognized that misspecified reproductive schedules can bias BRPs [@Secor2008], few studies have quantified how this biological error propagates through a harvest control rule (HCR) over time, especially when coupled with established selectivity patterns. 
+It remains unclear whether management advice based on biological maturity is inherently risky (leading to overfishing) or unintentionally precautionary (leading to foregone yield).
+
+To address this gap, a simulation testing framework was developed using northern rockfish (*Sebastes polyspinis*) and dusky rockfish (*S. ciliatus*) in the Gulf of Alaska (GOA) as case studies. 
+Both species are long-lived, ovoviviparous [@Kendall1987], and known to exhibit skip spawning [@Conrath2019]. 
+They are managed under the NPFMC Tier 3 HCR, which relies explicitly on $B_{40\%}$ and $F_{40\%}$ [@Williams2023; @Omori2023]. 
+This study utilizes an age-structured operating model (OM) parameterized with skip spawning dynamics coupled with an estimation model (EM) in a closed-loop feedback system. 
+By comparing scenarios where the EM correctly accounts for functional maturity against the status quo, this study evaluates the sensitivity of stock status estimates and long-term management performance to maturity misspecification.
+
+
+
+<!-- In data-moderate or data-rich, age-structured fishery stock assessments maturity is typically treated as a determinist and often time invariant input [@Miller2018].
 The maturity ogive, which defines the proportion of individuals mature at a given age or length, is generally estimated externally to the assessment model.
 This is frequently achieved using logistic regression to fit histological or macroscopic data from scientific surveys [@Williams2016].
 <!-- The resulting vector is then fixed within the assessment model, although some models do incorporate time-varying maturity schedules. -->
-Within this framework, the annual female spawning stock biomass (SSB) serves as the primary proxy for the stock's reproductive potential. 
+<!-- Within this framework, the annual female spawning stock biomass (SSB) serves as the primary proxy for the stock's reproductive potential. 
 SSB is calculated as the sum product of the number of females-at-age, their average or annual weight-at-age, and the proportion mature-at-age.
-This metric relies on the assumption of proportionality [@Morgan2008; @Lambert2008], that mature female biomass is linearly related to total egg production (TEP) and by extension, expected recruitment of the stock.
+This metric relies on the assumption of proportionality [@Morgan2008; @Lambert2008], that mature female biomass is linearly related to total egg production (TEP) and by extension, expected recruitment of the stock. -->
 
-However, the validity of SSB as a proxy for reproductive output depends heavily on how maturity is defined and quantified. 
+<!-- However, the validity of SSB as a proxy for reproductive output depends heavily on how maturity is defined and quantified. 
 As highlighted by @Head2020, there is a fundamental distinction between biological maturity and functional maturity. 
 Biological maturity refers to the developmental milestone where an individual becomes physiologically capable of producing gametes (i.e., the anatomical presence of developed gonads). 
-Functional maturity, refers to the proportion of biologically mature individuals that actually contribute to a spawning event.
+Functional maturity refers to the proportion of biologically mature individuals that actually contribute to a spawning event.
 The discrepancy between these two measures is primarily driven by "skip spawning", a life-history strategy where biologically mature adults forgo reproduction to prioritize somatic growth or survival [@Jorgensen2006; @Secor2008]. 
-When assessments rely soley on biological maturity in the presence of skip spawning, they risk overestimating the effective spawning biomass and distorting the resultant biological reference points.
+When assessments rely soley on biological maturity in the presence of skip spawning, they risk overestimating the effective spawning biomass and distorting the resultant biological reference points. -->
 
-Despite its prevalence [@Jorgensen2006; @Secor2008; @Rideout2011], skip spawning has rarely been explicitly modeled in stock assessments. 
+<!-- Despite its prevalence [@Jorgensen2006; @Secor2008; @Rideout2011], skip spawning has rarely been explicitly modeled in stock assessments. 
 Traditional macroscopic maturity staging often fails to distinguish between skip-spawners from immature individuals [@Rodgveller2018; @McBride2022], or simply lumps all large fish into a mature category. 
-When an assessment attributes reproductive output to non-spawning individuals, it can create a productivity illusion where the model observes a high spawning biomass producing average recruitment and incorrectly infers that the stock has low intrinsic productivity (e.g., low steepness).
+When an assessment attributes reproductive output to non-spawning individuals, it can create a productivity illusion where the model observes a high spawning biomass producing average recruitment and incorrectly infers that the stock has low intrinsic productivity (e.g., low steepness). -->
 
-The implications of this misspecification extend beyond biological accuracy to the core of management performance. 
+<!-- The implications of this misspecification extend beyond biological accuracy to the core of management performance. 
 While @Secor2008 noted that misspecified reproductive schedules could bias biological reference points (such as $F_{MSY}$ or $F_{40\%}$), few studies have quantified how this specific biological error propagates through a harvest control rule (HCR). 
-It remains unclear whether the resulting management advice is inherently risky, leading to overfishing or unintentionally precautionary, leading to foregone yield.
+It remains unclear whether the resulting management advice is inherently risky, leading to overfishing or unintentionally precautionary, leading to foregone yield. -->
 
-To address this gap, a simulation testing framework was developed for northern rockfish (*Sebastes polyspinis*) in the Gulf of Alaska (GOA) as a case study.
+<!-- To address this gap, a simulation testing framework was developed for northern rockfish (*Sebastes polyspinis*) in the Gulf of Alaska (GOA) as a case study.
 Northern rockfish are a long-lived, ovoviviparous [@Kendall1987], and known to exhibit skip spawning [@Conrath2019].
 They support a directed fishery, and are managed using an integrated age-structured stock assessment that assumes biological maturity [@Williams2023]. 
-To evaluate the sensitivity of the GOA northern rockfish stock assessment to unaccounted skip spawning, a simulation testing framework was developed. 
 This framework relies on an age-structured, single-sex operating model (OM) parameterized with skip spawning dynamics to generate synthetic observation data with realistic error. 
 This OM is coupled with an estimation model (EM) within a feedback loop to simulate the annual stock assessment and management process using the North Pacific Fisheries Management Council (NPFMC) Tier 3 HCR [@Dorn2020]. 
-By comparing scenarios where the EM correctly accounts for functional maturity against a misspecified those relying on biological maturity, this study evaluates the sensitivity of stock status estimates and management performance to maturity misspecification.
-
+By comparing scenarios where the EM correctly accounts for functional maturity against those relying on biological maturity, this study evaluates the sensitivity of stock status estimates and management performance to maturity misspecification. -->
 
 # Methods
-### Biological and Functional Maturity
-
-Historical age-at-maturity for northern rockfish was based on a logistic curve fitted to ovarian samples from 1996 (n=75) and 2000–2001 (n=157) [@Heifetz2003; @Chilton2007]. 
+## Biological and functional maturity
+Historical age-at-maturity for northern rockfish was based on a logistic curve fitted to ovarian samples from 1996 (n=75) and 2000–2001 (n=157) [@Heifetz2003; @Chilton2007].
 These data were integrated with contemporary samples (n=274) that explicitly identified skip-spawning events via histological analysis [@Conrath2019].
-
-Biological maturity ($M_{b,a}$) was estimated using a binomial Generalized Linear Model (GLM) with a logit link in R [@Rcore]. 
-To account for limited sampling of juvenile age classes and ensure the ogive approached zero at younger ages, observations for fish $\le$ age-6 were assigned higher weights in the likelihood function [@Conrath2021].
-Because maturity with skip-spawning exhibits non-logistic (Type IV) distributions [@Trippel1991], the age-specific probability of skip spawning ($P_{skip,a}$)$ was modeled independently using a binomial Generalized Additive Model (GAM) with a cubic regression spline for age, implemented via the mgcv package in R [@mgcv, @Rcore].
-Observed functional maturity ($M_{f,a}$), representing the proportion of the population contributing to spawning, was calculated by adjusting the biological ogive by :
+Biological maturity ($\Phi^{b}_{a}$) was estimated using a binomial Generalized Linear Model (GLM) with a logit link in R [@Rcore].
+To account for limited sampling of juvenile age classes and ensure the ogive approached zero at younger ages, observations for fish $\le$ age-6 were assigned higher weights in the likelihood function [@Conrath2021].Because maturity with skip-spawning exhibits non-logistic (Type IV) distributions [@Trippel1991], the age-specific probability of skip spawning ($P_{skip,a}$) was modeled independently using a binomial Generalized Additive Model (GAM) with a cubic regression spline for age, implemented via the mgcv package in R [@mgcv, @Rcore].
+Observed functional maturity ($\Phi^{f}_{a}$), representing the proportion of the population contributing to spawning, was calculated as an adjustment of the biological ogive by:
 $$
-M_{f,a} = M_{b,a} \times (1 - P_{skip,a}).
+\Phi^{f}_{a} = \Phi^{b}_{a} \times (1 - P_{skip,a}).
 $$ {#eq-pskip}
 
-## Simulation Framework (Operating Model)
-### Simulated Skip-Spawning Scenarios
+## Simulation framework
+A closed-loop simulation framework, conceptually similar to a management strategy evaluation [MSE, @Punt2016], was used to evaluate the management implications of skip spawning on stock assessment accuracy and management performance for northern rockfish in the GOA. 
+The evaluation framework relied of four primary components to simulate the fishery system.
+An operating model (OM) established the "true" age-structured population dynamics, from which an observation model generated realistic survey and fishery data with error structures.
+An estimation model (EM) was then fit to the simulated data to estimate stock status and reference points that fed into a management procedure utilizing the NPFMC Tier 3 HCR to set subsequent fishing mortality. 
+The simulation operates as an age-structured, single-sex, single-region, single-fishery population model projected at annual time steps and was conducted using the RTMB [@RTMB] package in R [@Rcore].
 
-To evaluate the sensitivity of the assessment model across a range of unobserved dynamics, 18 distinct skip-spawning scenarios were simulated (6 functional shapes X 3 maximum intensities: 10%, 20%, and 30%). 
+### Simulated skip-spawning scenarios
+
+To evaluate the sensitivity of the assessment model across a range of unobserved dynamics, 18 distinct skip-spawning scenarios were simulated (6 functional shapes $\times$ 3 maximum intensities: 10%, 20%, and 30%). 
 Because empirical observations of northern rockfish skip spawning are limited across the full age structure of a population, and are unknown both temporally and spatially in the GOA, this approach allowed for the exploration of diverse functional forms and intensities.
 Age-specific skip-spawning probabilities, $P_{skip,a}$, were simulated using a flexible curve-generating algorithm between ages 3--50, assuming no skip spawning outside this range. 
 The functional shapes included:
 
- - Dome/Skewed Dome: A symmetric, Gaussian-like curve where skip spawning peaks at the intermediate or early-mature ages.
- - Inverse Dome: High skipping in young and old individuals, low in middle ages.
- - Linear (Increasing/Decreasing): Constant change in skipping probability.
- - Constant: A uniform rate applied equally to all ages.
+* **Dome/Skewed Dome:** A symmetric, Gaussian-like curve where skip spawning peaks at the intermediate or early-mature ages.
+* **Inverse Dome:** High skipping in young and old individuals, low in middle ages.
+* **Linear (Increasing/Decreasing):** Constant change in skipping probability.
+* **Constant:** A uniform rate applied equally to all ages.
 
 ```{r}
 #| echo: false
@@ -99,185 +135,166 @@ The functional shapes included:
 knitr::include_graphics(here::here('figs', 'skip.png'))
 ```
 
-### Population Dynamics
+### Operating model and population dynamics
 
-A closed-loop simulation framework, conceptually similar to a management strategy evaluation [MSE, @Punt2016], was used to evaluate the management implications of skip spawning for northern rockfish in the GOA. 
-This framework couples a biological OM, which simulates the "true" population dynamics using functional maturity, to an EM that mimics the current stock assessment and HCR process.
-The simulation operates as an age-structured, single-sex, single-region, single-fishery population model projected at annual time steps. 
-The abundance of individuals of age $a$ in year $y$, denoted as $N_{a,y}$, is projected forward using standard exponential decay dynamics with parameter inputs taken from the most recent full fishery assessment [@Williams2023].
-
-Total mortality ($Z_{a,y}$) is partitioned into natural mortality ($M$) and fishing mortality ($F_y$), modulated by age-specific fishery selectivity ($s^{f}_a$): 
-
+The abundance of individuals of age $a$ in year $y$, denoted as $N_{a,y}$, was projected forward using standard exponential decay dynamics with parameter inputs taken from the most recent full fishery assessment [@Williams2023]. 
+Total annual mortality at age ($Z_{a,y}$) was partitioned into natural mortality ($M$) and fishing mortality ($F_y$), modulated by age-specific fishery selectivity ($s^{f}_a$): 
 $$
 Z_{a,y} = M + F_y s^{f}_a
 $$ {#eq-tot-mort}
 
 Survival and abundance for ages between the recruitment age ($a_{min}$) and the plus-group age ($A$) follow:
-
-$$N_{a,y} = \begin{cases} 
+$$
+N_{a,y} = \begin{cases} 
 R_{y} & \text{for } a = a_{min} \\ 
-N_{a-1,y} e^{-Z_{a-1,y-1}} & \text{for } a_{min} < a < A \\ 
-N_{A-1,y} e^{-Z_{A-1,y-1}} + N_{A,y-1} e^{-Z_{A,y-1}} & \text{for } a = A \text{ (Plus Group)} 
+N_{a-1,y-1} e^{-Z_{a-1,y-1}} & \text{for } a_{min} < a < A \\ 
+N_{A-1,y-1} e^{-Z_{A-1,y-1}} + N_{A,y-1} e^{-Z_{A,y-1}} & \text{for } a = A \text{ (plus group)} 
 \end{cases}
-$$ {#eq-Nat}
+$${#eq-Nat}
 
 Annual recruitment ($R_y$) serves as the primary source of stochastic variability between simulations. 
-Three specific recruitment scenarios were evaluated with future recruitment generated stochastically by drawing from log-normal distributions parameterized using quantiles of estimated historical log-recruitment from the assessment [@Williams2023]. 
+Three specific recruitment scenarios were evaluated with future recruitment generated stochastically by drawing from lognormal distributions parameterized using quantiles of estimated historical log-recruitment from the assessment [@Williams2023]. 
 
-Three recruitment scenarios were explored, median recruitment, a crash recruit (5th quantile for 20 years, followed by 80th quantile), and high recruitment (80th quantile). 
+The recruitment scenarios were: 
 
- - *Average:* Median historical log-recruitment with a log-standard deviation of 0.2.
- - *High:* 80th quantile historical log-recruitment with a log-standard deviation of 0.2.
- - *Crash:* 5th quantile historical log-recruitment with a log-standard deviation of 0.1 for 20 years, followed by 80th quantile historical log-recruitment with a log-standard deviation of 0.2 for the remaining years.
+* **Average:** Median historical log-recruitment with a log-standard deviation of 0.2.
+* **High:** 80th quantile historical log-recruitment with a log-standard deviation of 0.2.
+* **Crash:** 5th quantile historical log-recruitment with a log-standard deviation of 0.1 for 20 years, followed by 80th quantile historical log-recruitment with a log-standard deviation of 0.2 for the remaining years.
 
-Catch in numbers at age ($C_{a,y}$) is calculated using the Baranov catch equation [@Branch2009]:
+Catch in numbers at age ($C_{a,y}$) was calculated using the Baranov catch equation [@Branch2009]:
 
 $$
-C_{a,y} = \frac{F_y s^{f}_a}{Z_{a,y}} N_{a,y} (1 - e^{-Z_{a,y}})
+C_{a,y} = \frac{F_y s^{f}a}{Z_{a,y}} N_{a,y} (1 - e^{-Z_{a,y}})
 $$ {#eq-catch}
 
-Total yield ($Y_y$) is the sum product of catch numbers and weight ($W_a$):
-
+Total yield ($Y_y$) is the sum product of catch numbers and weight-at-age ($W_a$):
 $$
 Y_y = \sum_{a} C_{a,y} W_a
-$${#eq-yield}
+$$ {#eq-yield}
 
-## Defining the Biological Mismatch
+To represent the "true" $SSB$, the OM utilized the functional maturity schedule $\Phi^{f}_{a}$, which explicitly accounted for skip-spawning by reducing the proportion of active spawners at age compared to the underlying biological maturity schedule $\Phi^{b}_{a}$.
 
-A core component of this study is the distinction between annual biological and functional $SSB_y$. 
-It is calculated at a specific spawning fraction of the year ($\phi_{spawn}$), adjusting for mortality prior to spawning:
+## Observation model
 
+The observation model generated data mirroring the sampling frequency and error structures typical of GOA northern rockfish to feed into the EM.
+To match current survey designs, the scientific survey biomass ($I_y$) was generated biennially and observed with lognormal error ($CV = 0.1$) assuming a constant catchability ($q = 0.767$).
 $$
-SSB_y = \sum_{a=a_{min}}^{A} N_{a,y} e^{-Z_{a,y} \cdot \phi_{spawn}} \cdot W_a \cdot \Phi_{a,y}
-$$ {#eq-ssb}
-
-To quantify the cost of misspecification, the model defines the maturity ogive $\Phi_{a,y}$ differently depending on the scenario:
-
-*Functional Maturity ($\Phi^{func}_{a,y}$):* Represents the realized proportion of individuals that actually spawn, accounting for skip spawning rates ($P_{skip, a}$). 
-This is the "true" state used in the OM and the correctly specified EM.
-
-$$
-\Phi^{func}_{a,y} = \Phi^{bio}_{a} \cdot (1 - P_{skip, a})
-$$ {#eq-func-mat}
-
-*Biological Maturity ($\Phi^{bio}_{a}$):* Represents the proportion of individuals physiologically capable of reproduction. 
-This vector is used in the misspecified EM.
-
-$$
-\Phi^{bio}_{a} = \frac{1}{1 + e^{-\frac{a - a_{50}}{k}}}
-$$ {#eq-bio-mat}
-
-
-
-## Simulation Loop 
-
-For each projection year $y$, the simulation proceeds as follows:
-
-### 1. Harvest Control Rule
-The target fishing mortality $F_{y}$ is determined based on the stock status estimated in the previous year using the NPFMC HCR [@Dorn2020]. 
-This HCR scales fishing mortality linearly downward if the estimated spawning biomass drops below the target reference point, subject to a $0.05$ cutoff:
-
-$$
-F_y = \begin{cases}
-\hat{F}_{40\%} & \text{if } \dfrac{\hat{SSB}_{y-1}}{\hat{B}_{40\%}} > 1 \\
-\hat{F}_{40\%} \left( \dfrac{\dfrac{\hat{SSB}_{y-1}}{\hat{B}_{40\%}} - 0.05}{1 - 0.05} \right) & \text{if } 0.05 < \dfrac{\hat{SSB}_{y-1}}{\hat{B}_{40\%}} \le 1 \\
-0 & \text{if } \dfrac{\hat{SSB}_{y-1}}{\hat{B}_{40\%}} \le 0.05
-\end{cases}
-$${#eq-hcr}
-
-Where $\hat{F}_{40\%}$ is the estimated fishing mortality rate that reduces the spawning biomass per recruit to 40% of its unfished level.
-$\hat{SSB}_{y-1}$ is the EM's calculation of spawning stock biomass in the terminal year of data, and $\hat{B}_{40\%}$ is the estimated target spawning biomass reference point.
-
-### 2. Observation Generation
-New data is generated from the OM with observation error to feed the EM. 
-The scientific survey biomass ($I_y$) is observed with log-normal error ($CV = 0.1$) assuming a constant catchability ($q = 0.767$).
-
-$$
-I_y = q \left( \sum_{a=a_{min}}^{A} N_{a,y} W_a s_a^{s} \right) e^{\eta_y - \sigma_{obs}^2/2}
-$$ {#eq-obs}
-$$
-\eta_y \sim \mathcal{N}(0, \sigma_{obs}^2)
+I_y = q \left( \sum_{a=a_{min}}^{A} N_{a,y} W_a s_a^{s} \right) e^{\eta_y - \sigma_{obs}^2/2}$$ {#eq-obs}$$\eta_y \sim \mathcal{N}(0, \sigma_{obs}^2)
 $$ {#eq-obs-error}
 
-Where $N_{a,y}$ is the true OM abundance at age $a$, $W_a$ is weight-at-age, and $s_a^s$ is the survey selectivity.
+Where $N_{a,y}$ is the true OM abundance at age, $W_a$ is weight-at-age, and $s_a^s$ is the survey selectivity at age.
 
-Observed age compositions ($O_{a,y}$) for both the fishery and survey are generated using a multinomial distribution to simulate sampling error, driven by an effective sample size $N_{eff}$:
+Observed age compositions ($O_{a,y}$) for both the fishery and survey were generated in two steps to accoun for both sampling variance and age reading misclassification.
+First, the true vulnerable proportions at age ($\mathbf{p}_y^v$) for gear $v$ (where $v \in \{survey, fishery\}$) were calculated based on the true abundance and the respective gear selectivity ($s_a^v$):
+$$
+p_{a,y}^v = \frac{N_{a,y} s_a^v}{\sum_{a} N_{a,y} s_a^v}
+$$ {#eq-p-true}
+
+Next, raw sample counts were drawn from a multinomial distribution parameterized by an effective sample size ($N_{eff} = 100$) and the true proportions. 
+These sampled proportions were then multiplied by an aging error matrix ($\mathbf{A}$) to yield the final observed age compositions ($\mathbf{O}_y^v$):
 
 $$
-O_{a,y} \sim \text{Multinomial}(N_{eff}, P_{a,y})
-$$ {#eq-comp}
+\mathbf{x}y^v \sim \text{Multinomial}(N{eff}, \mathbf{p}_y^v)
+$$ {#eq-multinom}
 $$
-P_{a,y} = \frac{C_{a,y}}{\sum_a C_{a,y}}
-$$ {#eq-p-comp}
+\mathbf{O}_y^v = \mathbf{A} \left( \frac{\mathbf{x}_y^v}{N_{eff}} \right)
+$$ {#eq-obs-comp}
 
-Additionally, the total fishery catch ($Y_y$) is observed with no error to represent highly monitored landings, and assumes that all available quota is harvested.
+where $\mathbf{A}$ contains the probability of assigning an observed age $a'$ given a true age $a$.
 
+Data availability to the EM alternated depending on the year. 
+In survey years, the EM was fit to both the simulated survey biomass and survey age compositions. 
+In non-survey years, the EM was fit to the fishery age compositions. 
+Additionally, the total fishery catch ($Y_y$) was observed without error to represent highly monitored landings, operating under the assumption that all available quota is harvested.
 
-### 3. Assessment Update & Mismatch
-The stock assessment [@Williams2023] was emulated using an RTMB-based age-structured model that estimated fishing mortality and recruitment deviations. 
-The EM is updated with the newly generated time series of catch, survey indices, and age compositions.
-
-A biological mismatch is introduced by defining different maturity ogives for the OM and EM. Let $\Phi^{true}_{a,y}$ represent the true functional maturity and $\Phi^{bio}_{a,y}$ represent the historical biological maturity assumption. 
+## Estimation model and scenarios
+The stock assessment [@Williams2023] was emulated using an RTMB-based age-structured model that estimated fishing mortality and recruitment deviations for use as the EM. 
+A biological mismatch was introduced by defining different maturity ogives for the OM and EM. 
+Let $\Phi^{true}_{a,y}$ represent the true functional maturity and $\Phi^{bio}_{a,y}$ represent the historical biological maturity assumption. 
 Two distinct management scenarios were evaluated:
 
- - Scenario i (Correctly Specified): The EM was provided with the "true" functional maturity schedule ($\Phi^{EM}_{a,y} \leftarrow \Phi^{true}_{a,y}$). This represents an ideal management scenario with perfect biological knowledge.
-  - Scenario ii (Misspecified): The EM was provided with the "biological" maturity schedule, assuming 100% participation of mature fish ($\Phi^{EM}_{a,y} \leftarrow \Phi^{bio}_{a,y}$). This represents the status quo where skip spawning is ignored.
+- **Scenario *i*** (Correctly Specified): The EM was provided with the true functional maturity schedule ($\Phi^{EM}_{a,y} \leftarrow \Phi^{f}_{a,y}$). This represents an ideal management scenario with perfect biological knowledge.
+- **Scenario *ii*** (Misspecified): The EM was provided with the biological maturity schedule, assuming 100\% participation of mature fish ($\Phi^{EM}_{a,y} \leftarrow \Phi^{b}_{a,y}$). This represents the status quo with skip spawning ignored.
 
-The assessment model parameters are estimated by minimizing the joint negative log-likelihood of the objective function. Because the misspecified EM uses an incorrect maturity ogive, its estimates of spawning biomass ($\hat{SSB}_{y}$) and reference points ($\hat{B}_{40\%}$) inherently diverge from the true OM states.
+The assessment model parameters were estimated by minimizing the joint negative log-likelihood of the objective function. 
+Because the misspecified EM uses an incorrect maturity ogive, its estimates of spawning biomass ($\widehat{SSB}_{y}$) and reference points ($\widehat{B}_{40\%}$) inherently diverge from the true OM states.
 
-The target fishing mortality ($F_y$) prescribed by the EM's HCR is then applied back to the OM. 
-This creates a dynamic feedback loop: if the misspecified model underestimates productivity, it sets a lower target $F$, which feeds back into the OM to determine the true catch and future stock trajectory. 
-Total catch is assumed to be known without error to match the implementation of the HCR, and the age-specific true fishing mortality is calculated using the OM's true fishery selectivity ($s_a^f$):
-
+The target fishing mortality ($F_y$) prescribed by the EM's HCR was then applied back to the OM. 
+This creates a dynamic feedback loop whereby if the misspecified model overestimates productivity, it sets a higher target $F$, which feeds back into the OM to determine the true catch and future stock trajectory. 
+Total catch was assumed to be known without error to match the implementation of the HCR, and the age-specific true fishing mortality was calculated using the OM's fishery selectivity ($s_a^f$):
 $$
 F_{a,y}^{true} = s_a^f F_y e^{\omega_y}
 $${#eq-f-true}
 
-To capture process and observation uncertainty, 50 Monte Carlo iterations were performed for each combination of skip-spawning shape (dome, inverse dome, skewed dome, linear increase, linear decrease, and constant) and magnitude (10%, 20%, and 30% skip-spawning rates). 
-Natural mortality ($M$), fishery and survey selectivity, and catchability ($q$) were held constant across all simulations. 
+To capture process and observation uncertainty, 50 Monte Carlo iterations were performed for each combination of skip-spawning shape (dome, inverse dome, skewed dome, linear increase, linear decrease, constant, and observed), magnitude (10\%, 20\%, 30\%, or observed skip-spawning rates), and recruitment scenario (average, high, crash).
+Natural mortality ($M$), fishery and survey selectivity, and catchability ($q$) were held constant across all simulations.
 Projections were run for 100 years to allow the system to reach a dynamic equilibrium under the management feedback loop.
 
+## Management procedure and projections
 
-The EM is updated with the newly generated time series of catch, survey indices, and age compositions.
-The biological mismatch is introduced by defining different maturity ogives for the OM and EM:
-Let $\Phi^{true}_{a,y}$ represent the true functional maturity and $\Phi^{bio}_{a,y}$ represent the historical biological maturity assumption. 
-
+The target fishing mortality $F_{y}$ was determined based on the stock status estimated in the previous year using the NPFMC HCR [@Dorn2020].
+This HCR scales fishing mortality linearly downward if the estimated spawning biomass drops below the target reference point, subject to a $0.05$ cutoff:
 $$
-\text{OM Maturity}: \Phi^{OM}_{a,y} \leftarrow \Phi^{true}_{a,y}
-$$
+F_y = \begin{cases}
+\widehat{F}_{40\%} & \text{if } \dfrac{\widehat{SSB}_{y-1}}{\widehat{B}_{40\%}} > 1 \\
+\widehat{F}_{40\%} \left( \dfrac{\dfrac{\widehat{SSB}_{y-1}}{\widehat{B}_{40\%}} - 0.05}{1 - 0.05} \right) & \text{if } 0.05 < \dfrac{\widehat{SSB}_{y-1}}{\widehat{B}_{40\%}} \le 1 \\
+0 & \text{if } \dfrac{\widehat{SSB}_{y-1}}{\widehat{B}_{40\%}} \le 0.05
+\end{cases}
+$${#eq-hcr}
 
-$$
-\text{EM Maturity}: \Phi^{EM}_{a,y} \leftarrow \begin{cases} \Phi^{true}_{a,y} & \text{if Scenario i (Correctly Specified)} \\ \Phi^{bio}_{a,y} & \text{if Scenario ii (Misspecified)} \end{cases}
-$$
+Where $\widehat{F}_{40\%}$ is the estimated fishing mortality rate that reduces the spawning biomass per recruit to 40\% of its unfished level.
+$\widehat{SSB}_{y-1}$ is the EM's calculation of spawning stock biomass in the terminal year of data, and $\widehat{B}_{40\%}$ is the estimated target spawning biomass reference point.
 
-The assessment model parameters are then estimated by minimizing the joint negative log-likelihood of the objective function. 
-Because the misspecified EM uses an incorrect maturity ogive ($\Phi^{bio}_{a,y}$), its estimates of spawning biomass ($\hat{SSB}_{y}$) and reference points ($\hat{B}_{40\%}$) will inherently diverge from the true OM states.
+## Performance metrics
 
-The target fishing mortality ($F_y$) prescribed by the EM's Harvest Control Rule is applied back to the OM. 
-Total catch is assumed to be known without error, matching the implementation of the harvest control rule. The age-specific fishing mortality is calculated using the OM's true fishery selectivity ($s_a^f$)
+To quantify the management implications of unmodeled skip-spawning, performance metrics were quantified through stationary and temporal metrics for both conservation risk and fishery stability. 
+Metrics were defined in three different groups.
+Stock status and risk metrics that evaluate the true biological state of the poopulation relative to management reference points.
 
-$$
-F_{a,y}^{true} = s_a^f F_y e^{\omega_y}
-$$ {#eq-f-true}
+The ratio of the true SSB to the target reference point, $B_{35}$.
+The ratio of the true fishing mortality ($F_t$) to the overfishing reference point, $F_{35}$.
+Overfished Indicator (B35_test): A binary variable used to calculate the probability of the stock becoming overfished, triggering a value of 1 if the true SSB falls below $B_{35}$.
+Overfishing Indicator (F35_test): A binary variable used to calculate the probability of overfishing occurring, triggering a value of 1 if the true $F_t$ exceeds $F_{35}$.
+
+Estimation metrics were used to evaluate how accurately the EM perceived the stock compared to the OM. 
+Relative SSB Error (ssb_error): The percentage error between the EM-estimated SSB and the true OM SSB. 
+This measures assessment bias.
+Absolute SSB Error (ssb_diff): The absolute difference in biomass between the true state and estimated state.
+Catch Advice Buffer (F_diff): The difference between the $F_{40}$ reference point and the actual realized fishing mortality.
+
+To evaluate the performance of the management procedure and the consequences of model mis-specification, several performance metrics were calculated for each iteration. 
+Stock status was assessed using biological ratios, specifically Biomass Status (the ratio of true spawning stock biomass to $B_{35}$) and Fishing Intensity (the ratio of true fishing mortality to $F_{35}$). 
+To quantify biological risk, we calculated the probability of the stock being overfished (true SSB < $B_{35}$) and the probability of overfishing occurring (true $F > F_{35}$). 
+Assessment accuracy was evaluated by calculating the relative percentage error between the estimation model's reported spawning biomass and the operating model's true spawning biomass. 
+Finally, to isolate the specific impact of the mis-specified maturity ogive, we calculated the relative percentage bias in both Biomass Status and Fishing Intensity between the mis-specified scenario (Scenario II) and the functionally correct baseline (Scenario I).
 
 
-The stock assessment [@William2023] was emulated using a RTMB-based age-structured model that estimated fishing mortality and recruitment deviations. 
-Two distinct management scenarios were evaluated: Correct specification (Scenario i): The assessment model was provided with the "true" functional maturity schedule. 
-This represents an "ideal" management scenario where biological knowledge is perfect.
-Misspecification (Scenario ii): The assessment model was provided with the "biological" maturity schedule (assuming 100% participation of mature fish). 
-This represents the status quo where skip spawning is ignored.
-In every projection year, the estimated stock status from both scenarios was fed into a Tier 3-style Harvest Control Rule. 
-The HCR calculated a target fishing mortality ($F_{target}$) based on the ratio of current SSB to the reference target ($B_{40\%}$). 
-This creates a dynamic feedback loop: if the misspecified model underestimates productivity, it sets a lower $F_{target}$, which feeds back into the OM to determine the true catch and future stock trajectory.
-We performed 50 Monte Carlo iterations for each combination of skip spawning shape (dome, inverse dome, skewed dome, linear increase and decrease, and constant) and magnitude (2, 5, 10, 20 and 30% skip spawning rates). 
+Biological and conservation risk was quantified through both stationary and temporal metrics
+Conservation risk was assessed via the probability of overfishing $P(F > F_{35\%})$ and the probability of the stock becoming overfished $P(SSB < B_{35\%})$ over the projection period. 
+Fishery stability was evaluated using average annual catch variation (AACV) to measure quota volatility. 
+To isolate the effect of the biological misspecification, all metrics were evaluated as a relative difference (Eq. X) between the misspecified EM (Scenario II) and the baseline EM (Scenario I).
 
-Natural mortality $M$, fishery and survey selectivity, and catchability $q$ were held constant for all simulations.
-Projections were run for 50 years to allow the system to reach a dynamic equilibrium under the management feedback. -->
+
 
 Simulation outputs were analyzed using a combination of diagnostic checks, probabilistic risk assessments, and temporal performance metrics.
-To ensure the stability of the Operating Model (OM) during the transition from the historical period to the projection period, initial diagnostic checks were performed. 
-The presence of simulation "shocks" by plotting the trajectories of spawning stock biomass ($SSB$) and fishing mortality ($F$) across the historical-to-projection boundary were evaluated. 
+To ensure the stability of the OM during the transition from the historical period to the projection period, initial diagnostic checks were performed. 
+The presence of simulation "shocks" by plotting the trajectories of $SSB$ and $F$ across the historical-to-projection boundary were evaluated. 
 This confirmed that the simulated population dynamics did not exhibit unintended, artificial jumps upon initialization.
+
+
+To evaluate the impact of unmodeled skip-spawning, the resulting estimation error and management risk were quantified. 
+Estimation error was calculated as the percentage bias in EM-derived variables (e.g., $SSB_b$ and $F_b$) relative to the true functional maturity OM values (e.g., $SSB_f$): 
+$$
+\frac{SSB_b - SSB_f}{SSB_f} \times 100
+$${#eq-pm}
+
+Management risk was evaluated by calculating the probability of the true OM population breaching critical conservation thresholds (e.g., falling below $B_{35\%}$ or exceeding $F_{35\%}$) across the projection period.
+Results from the misspecified EM (Scenario II) were compared directly to the baseline EM (Scenario I) to yield the marginal change in probability of a threshold breach attributable to the skip-spawning behavior.
+
+
+
+
+
 
 The primary axis of evaluation focused on the biological risk incurred by management misspecification. We evaluated stock status using a phase-plane approach (Kobe plots), categorizing the stock into four quadrants: Safe, Overfished, Overfishing, and High Risk (both Overfished and Overfishing). Crucially, this risk was evaluated from two distinct perspectives:The Management Perspective: Using estimated stock status relative to estimated reference points (perceived $SSB/B_{35}$ and perceived $F/F_{35}$).The True Biological Perspective: Using the "God's eye view" of true simulated stock status relative to true functional reference points, revealing the hidden biological reality resulting from the implemented control rules.To quantify this risk over time, we calculated the absolute probability of the true functional biomass breaching key biological reference points, specifically $B_{40}$ (target), $B_{35}$ (limit), and an estimated hard limit approaching population collapse ($B_{20}$, approximated as $B_{35} \times 0.57$). Temporal risk patterns were further visualized across all iterations using severity-ranked raster plots to identify whether structural misspecification leads to chronic depletion or acute, intermittent crashes.
 
@@ -287,7 +304,17 @@ Average and median annual catch.
 
 Catch stability, measured as the Average Annual Variability (AAV) or coefficient of variation in catch, defined by the mean absolute percentage change in year-to-year catch.
 
-# Performance Metrics
+# Performance metrics
+
+Perception versus reality
+ - assessment error ssb_diff_ii or sbb_error
+
+
+The relative difference percent difference in true stock status caused by the assement model's misspecification was plotted 
+
+
+
+
 Outputs were evaluated on four primary axes categories to quantify the biological and management consequences of maturity misspecification.
 
 A dual-perspective phase-plane analysis was utilized to distinguish between the perceived status reported by the assessment (Scenario ii) and the true biological state of the population. 
@@ -323,25 +350,13 @@ The management-reality gap
 
 
 
-Performance using 50 Monte Carlo iterations per scenario over a 100-year projection.
-Biological Risk: Evaluated using Kobe plots to compare perceived stock status (EM) against true biological status (OM). 
-Risk was quantified as the probability of the true $SSB$ falling below $B_{35\%}$ or $B_{20\%}$.
-Management Performance: Quantified via average annual yield and catch stability (Average Annual Variability; AAV).
-
-
-Plot risk: Compare scenario i against ii - 
- - use to compare that ignoring skip spawning results in more time in poor management scenarios
-
-Status mismatch: perception vs reality for scenario ii
-
-
  - 
 
 # Results
-## Observed Biological and Functional Maturity Estimation
+## Observed biological and functional maturity estimation
 *Biological maturity params...*
-Skip spawning was estimated to be highest for the youngest ages present in the data, declined to a minimum of 4.3% at age-25 and began to increase slightly after age-35 [@fig-maturity].
-Because empirical skip-spawning data were unavailable for fish younger than 12 years old, the predicted skip-spawning rate for ages 2 through 11 was held constant at the predicted age-12 level ($32.9\%$). 
+Skip spawning was estimated to be highest for the youngest ages present in the data, declined to a minimum of 4.3\% at age-25 and began to increase slightly after age-35 [@fig-maturity].
+Because empirical skip-spawning data were unavailable for fish younger than age-12, the predicted skip-spawning rate for ages 2--11 was held constant at the predicted age-12 level ($32.9\%$). 
 This constraint was implemented to prevented a biologically unreasonable spike in the functional maturity curve relative to the biological ogive at younger ages.
 
 ```{r}
@@ -351,8 +366,71 @@ This constraint was implemented to prevented a biologically unreasonable spike i
 knitr::include_graphics(here::here('figs', 'maturity.png'))
 ```
 
+## Simulation-estimation results
+
+Internal results:
+How accurate is the assessment model when maturity is misspecified? The estimation error inside of Scenario II.
+The SSB is generally overestimated for all of the maturity scenarios in most years, the exception being the the rebuilding phase after the 20-year recruitment crash scenario. 
+The assessment model—which relies on smoothed survey data, moving averages, and delayed age-comps—is sluggish. 
+It doesn't believe the stock is recovering as fast as it actually is.
+
+Management behavior inside Scenario II
+Generally the assessment state is below 1.0, indicating that the true fishing mortality is staying below the $F_{40}$ target level.
+
+External results:
+
+
+
+
+Spawning biomass bias:
+	- zero line mean the misspectfied assessment had no impact on the true biomass.
+  a positve bias led to more iterations with SSB > $B_35$, this occurs because the assessment underestimates productivity leading to more conservative catch limits.
+  q negative bias means the SSB < $B_35$ more often than thee true population and catch limits were set too high.
+
+  Symmetric or flat error structures (e.g., constant, or dome shaped skip spawning) indicate that these types of misspecification do not severly bias the long-term biomass.
+  The rate dictates the magnitude of the bias. A 10\% skip spawning rate causes a relatively minor divergenc in bias, a 30% skip spawning rate may increase the 
+  Looking at the observed skip spawning scenario the status quo process assessment may be leading to lower true biomass levels than intended.
+  Recruitment is not a factor in this bias. 
+
+
+```{r}
+#| echo: false
+#| label: fig-pm
+#| fig-cap: "The biological maturity ogive-at-age, associated level of skip spawning and resultant functional maturity ogive for Gulf of Alaska northern rockfish. The shaded box covers the ages with no skip spawning information available."
+knitr::include_graphics(here::here('figs', 'maturity.png'))
+```
+
 
 More AI slop
+
+Figure [X] illustrates the relative percentage bias in Biomass Status—defined as the ratio of true spawning stock biomass to the $B_{35}$ reference point ($SSB/B_{35}$)—across a 100-year projection under varying maturity mis-specification scenarios. 
+The direction of this status bias was primarily driven by the functional shape of the skip-spawning mis-specification. 
+'Increasing' skip shapes consistently resulted in a positive bias (the population remained higher relative to its $B_{35}$ target due to overly conservative catch advice), whereas 'decreasing' shapes resulted in a negative bias (the population became more depleted relative to its $B_{35}$ target). 
+Furthermore, the magnitude of this bias scaled directly with the assumed skip rate, with the 30\% skip rate causing the most severe divergence from the functionally accurate baseline. 
+Notably, these trends remained highly consistent across all three recruitment scenarios (average, high, and crash), indicating that the relative impact of maturity mis-specification on stock status is largely independent of underlying recruitment dynamics. 
+Finally, the 'observed' empirical scenario consistently yielded a negative status bias of approximately -3\% to -5\% across all iterations, suggesting that historical misclassifications may systematically push the stock closer to, or further below, its $B_{35}$ management target than intended.
+
+
+Figure [Y] illustrates the relative percentage bias in Fishing Intensity—defined as the ratio of true fishing mortality to the $F_{35}$ reference point ($F/F_{35}$)—across the 100-year projection. As expected, the trends in Fishing Intensity bias mirror the inverse of the Biomass Status bias. The 'decreasing' skip-spawning shapes resulted in a positive bias in Fishing Intensity, indicating that the mis-specified assessment consistently prescribed catch limits that subjected the stock to higher fishing pressure than intended. 
+Conversely, the 'increasing' and 'skewed dome' shapes resulted in a negative bias, driving lower fishing mortality than the baseline.
+Similar to the biomass results, the magnitude of the fishing mortality error scaled with the skip rate parameter, where the 30\% skip rate caused the most extreme deviations (upwards of a +10\% bias in F for 'decreasing' shapes and a -10\% bias for 'increasing' shapes). 
+These dynamics were stable across all three recruitment scenarios, reinforcing that the harvest control rule's reaction to maturity mis-specification is insensitive to the underlying recruitment state. 
+Notably, relying on the empirically 'observed' maturity ogive consistently generated a positive bias in Fishing Intensity of approximately +5\% to +10\%. 
+This confirms that historical mis-classifications of skip-spawning lead the assessment to overestimate stock productivity, subsequently allowing excessive fishing mortality that drives the chronic stock depletion seen in the biomass projections."
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Simulation Results: Risk of Overfishing and Depletion
 Simulations were conducted over a 100-year projection period to evaluate the stock's response to full harvest allocations under three distinct recruitment scenarios. Across all scenarios, the initial 10 to 20 years exhibit a sharp decline in stock status, driving a high proportion of simulation runs into "Overfished" or "Critical" categories. This early shock is an expected artifact of the simulation transitioning from historical realized catch levels (approximately 40% of the Total Allowable Catch [TAC]) to the assumption that 100% of the TAC is fully harvested.
@@ -391,15 +469,57 @@ effects of inclusion of skip spawning
 
 AI slop below:
 
-Steepness is arguably the most important—and the most notoriously difficult to estimate—parameter in modern fisheries stock assessments.While the compensation ratio ($D$) tells you the multiplier of productivity near zero, steepness (always denoted as $h$) puts that productivity into a standardized, practical context.Here is how they connect and why steepness rules the assessment world:1. What is Steepness ($h$)?Steepness is officially defined as the fraction of unfished recruitment ($R_0$) that is expected when the spawning stock biomass is reduced to exactly 20% of its unfished level ($0.2 S_0$).If $h = 1.0$: Recruitment is 100% of $R_0$ even when the stock is knocked down to 20%. The stock is incredibly resilient and highly productive (essentially a flat line from $S_0$ all the way down to 20%).If $h = 0.2$: Recruitment drops linearly with spawning biomass. At 20% biomass, you get 20% recruitment. There is zero compensatory density dependence. If a fish has $h=0.2$, almost any commercial fishing will drive it toward collapse.For most marine fish, steepness falls somewhere between $0.4$ and $0.9$.2. The Math Translating $D$ into $h$The relationship between $D$ (the slope at the origin) and $h$ (steepness) depends on the specific shape of the spawner-recruit model you are using. In the standard Beverton-Holt model, the conversion is beautifully simple.To find steepness from the compensation ratio:$$h = \frac{D}{D + 4}$$To find the compensation ratio if you know steepness:$$D = \frac{4h}{1 - h}$$Example: If a stock has a compensation ratio of $D=4$ (meaning spawners are 4 times more productive at low abundances), its steepness is $h = 4/8$, or $0.5$. This means at 20% spawning biomass, the stock will produce 50% of its unfished recruitment.3. Why is Steepness So Critical?If you are running an assessment model, $h$ acts as the ultimate dial for the stock's biological resilience.It defines the Maximum Sustainable Yield (MSY): You literally cannot calculate the true MSY, or the optimal fishing mortality ($F_{MSY}$), without knowing steepness. Higher steepness means a higher MSY and a higher allowable catch.It dictates rebuilding times: If a stock is overfished, the steepness value will dictate how many years it will take to rebuild to target levels.The "Information Void": Here is the ultimate catch-22 in fisheries. To accurately measure $h$ with real data, you need data points showing what happens when the stock is at 20% of its unfished level. But management is specifically designed to prevent the stock from ever getting that low. Therefore, for well-managed stocks, you often lack the very data needed to calculate steepness!Because steepness is so hard to estimate from a noisy "shotgun blast" of data, scientists often have to fix the value in the model based on life-history meta-analysis (e.g., assuming $h=0.7$ for a typical rockfish based on studies of similar species).This circles us right back to your first question: because $h$ is so difficult to lock down, calculating absolute MSY is incredibly uncertain, making SPR proxies the safest and most reliable way to manage.Would you like to look at how we select specific SPR targets (like $30\%$ versus $50\%$) based on what we assume a stock's steepness might be?
+Steepness is arguably the most important—and the most notoriously difficult to estimate—parameter in modern fisheries stock assessments.While the compensation ratio ($D$) tells you the multiplier of productivity near zero, steepness (always denoted as $h$) puts that productivity into a standardized, practical context.Here is how they connect and why steepness rules the assessment world:1. 
+What is Steepness ($h$)?
+Steepness is officially defined as the fraction of unfished recruitment ($R_0$) that is expected when the spawning stock biomass is reduced to exactly 20\% of its unfished level ($0.2 S_0$).
+If $h = 1.0$: Recruitment is 100\% of $R_0$ even when the stock is knocked down to 20\%. 
+The stock is incredibly resilient and highly productive (essentially a flat line from $S_0$ all the way down to 20\%).
+If $h = 0.2$: Recruitment drops linearly with spawning biomass. 
+At 20\% biomass, you get 20\% recruitment. 
+There is zero compensatory density dependence. 
+If a fish has $h=0.2$, almost any commercial fishing will drive it toward collapse.
+For most marine fish, steepness falls somewhere between $0.4$ and $0.9$.
+2. The Math Translating $D$ into $h$
+The relationship between $D$ (the slope at the origin) and $h$ (steepness) depends on the specific shape of the spawner-recruit model you are using. 
+To find steepness from the compensation ratio:$$h = \frac{D}{D + 4}$
+To find the compensation ratio if you know steepness:$$D = \frac{4h}{1 - h}$$
+Example: If a stock has a compensation ratio of $D=4$ (meaning spawners are 4 times more productive at low abundances), its steepness is $h = 4/8$, or $0.5$. 
+This means at 20% spawning biomass, the stock will produce 50% of its unfished recruitment.
+3. Why is Steepness So Critical?
+If you are running an assessment model, $h$ acts as the ultimate dial for the stock's biological resilience.
+It defines the Maximum Sustainable Yield (MSY): You literally cannot calculate the true MSY, or the optimal fishing mortality ($F_{MSY}$), without knowing steepness. Higher steepness means a higher MSY and a higher allowable catch.
+It dictates rebuilding times: If a stock is overfished, the steepness value will dictate how many years it will take to rebuild to target levels.
+The "Information Void": Here is the ultimate catch-22 in fisheries. 
+To accurately measure $h$ with real data, you need data points showing what happens when the stock is at 20% of its unfished level. 
+But management is specifically designed to prevent the stock from ever getting that low. 
+Therefore, for well-managed stocks, you often lack the very data needed to calculate steepness!Because steepness is so hard to estimate from a noisy "shotgun blast" of data, scientists often have to fix the value in the model based on life-history meta-analysis (e.g., assuming $h=0.7$ for a typical rockfish based on studies of similar species).
+This circles us right back to your first question: because $h$ is so difficult to lock down, calculating absolute MSY is incredibly uncertain, making SPR proxies the safest and most reliable way to manage.
 
-You are connecting the dots perfectly. Your intuition is exactly right: skip spawning effectively decreases steepness ($h$), and it fundamentally changes how you need to approach your SPR targets.When a stock exhibits skip spawning—especially among younger, newly mature fish—it creates a dangerous biological illusion if your management framework isn't adjusted for it. Here is how skip spawning impacts steepness and how you must adapt your SPR strategy to compensate.1. Why Skip Spawning Decreases Steepness ($h$)Remember that steepness ($h$) is a measure of resilience—the stock's ability to pump out recruits when the population is knocked down to 20% of its unfished level. This relies entirely on the compensatory spike in productivity ($D$).If young fish skip spawning (often because they are allocating their limited energy to somatic growth or surviving poor environmental conditions rather than gonadal development), the actual reproductive engine of the stock is severely downgraded.At low population sizes, you need every mature fish to produce eggs to achieve that compensatory spike.If a massive chunk of your mature biomass is taking the year off, the realized productivity per mature fish drops.A lower compensatory ratio ($D$) mathematically results in a lower steepness ($h$). The stock simply has less "spring" to bounce back from depletion.2. The "Ghost Biomass" Problem in SPRThe core of managing with SPR is comparing your current Spawning Potential to your unfished Spawning Potential.In traditional assessments, "Spawning Stock Biomass" (SSB) is calculated by simply looking at weight-at-age and multiplying it by maturity-at-age. But if you have skip spawning, a fish can be mature (capable of spawning) but not active (actually dropping eggs this year).If your SPR model counts these skip-spawners as part of the SSB, you are managing based on ghost biomass. Your model will tell you that you are at an SPR of 40%, but because half your young fish aren't actually spawning, the biological reality in the water might be an SPR of 20%. You will accidentally overfish the stock while the model tells you everything is fine.
+skip spawning effectively decreases steepness ($h$), and it fundamentally changes how you need to approach your SPR targets.
+When a stock exhibits skip spawning—especially among younger, newly mature fish—it creates a dangerous biological illusion if your management framework isn't adjusted for it. 
+Here is how skip spawning impacts steepness and how you must adapt your SPR strategy to compensate.
+1. Why Skip Spawning Decreases Steepness ($h$)Remember that steepness ($h$) is a measure of resilience—the stock's ability to pump out recruits when the population is knocked down to 20% of its unfished level. 
+This relies entirely on the compensatory spike in productivity ($D$).
+If young fish skip spawning (often because they are allocating their limited energy to somatic growth or surviving poor environmental conditions rather than gonadal development), the actual reproductive engine of the stock is severely downgraded.
+At low population sizes, you need every mature fish to produce eggs to achieve that compensatory spike.
+If a massive chunk of your mature biomass is taking the year off, the realized productivity per mature fish drops.
+A lower compensatory ratio ($D$) mathematically results in a lower steepness ($h$). 
+The stock simply has less "spring" to bounce back from depletion.
+2. The "Ghost Biomass" Problem in SPR
+The core of managing with SPR is comparing your current Spawning Potential to your unfished Spawning Potential.
+In traditional assessments, "Spawning Stock Biomass" (SSB) is calculated by simply looking at weight-at-age and multiplying it by maturity-at-age. 
+But if you have skip spawning, a fish can be mature (capable of spawning) but not active (actually dropping eggs this year).
+If your SPR model counts these skip-spawners as part of the SSB, you are managing based on ghost biomass. 
+Your model will tell you that you are at an SPR of 40%, but because half your young fish aren't actually spawning, the biological reality in the water might be an SPR of 20%. 
+You will accidentally overfish the stock while the model tells you everything is fine.
 
 
 Options wher one cannot estimate MSY & $h$
 Adjust the Denominator (Use Fecundity, not Biomass): Instead of using mature female biomass to calculate SPR, you must shift your SPR calculation to use Total Egg Production (TEP) or active spawning biomass. This requires building a "probability of spawning" vector into your life-history tables alongside the maturity vector. A 4-year-old fish might be 100% mature, but only have a 30% probability of actually spawning.
 
-Increase the SPR Target: If you cannot quantify the exact rate of skip spawning to adjust the model's inner workings, you must manage the uncertainty by shifting your proxy. Because skip spawning lowers effective $h$ (meaning the stock is less resilient than a standard teleost), a generic SPR target of 30% or 40% is no longer safe. You should treat the stock like a highly vulnerable species and shift your management target to a more conservative proxy, such as an SPR of 50% or even 60%.
+Increase the SPR Target: If you cannot quantify the exact rate of skip spawning to adjust the model's inner workings, you must manage the uncertainty by shifting your proxy. 
+Because skip spawning lowers effective $h$ (meaning the stock is less resilient than a standard teleost), a generic SPR target of 30% or 40% is no longer safe. 
+You should treat the stock like a highly vulnerable species and shift your management target to a more conservative proxy, such as an SPR of 50% or even 60%.
 
 # Conclusions
 Given the interaction between maturity-at-age (or length) estimation and determination of biological reference points it would be prudent to increase our understanding of the temporal and spatial consistency of skip spawning for managed fisheries that exhibit skip spawning to some degree. 
@@ -412,7 +532,8 @@ Further, a MSE approach, particularly a "desktop" MSE [@Walter2023]
 The author declares that he has no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 
 # Acknowledgements
-I thank Christina Conrath for providing maturity data for this analysis. This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+I thank Christina Conrath for providing maturity data for this analysis. 
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
 # Data Availability
 The data are available upon request from the author.
