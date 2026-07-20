@@ -8,21 +8,20 @@ source(here::here("R", "hcr.R"))
 # data ----
 dusk = readRDS(here::here("data", "dusk.rds"))
 data = dusk$dat
-rpt = readRDS(here::here("output", "d_rpt.rds"))
+rpt = dusk$rpt
 skip <- readRDS(here::here("data", "d_dat.RDS")) %>% 
   filter(age %in% 4:33)
 
-
 # globals ----
-n_iter <- 50
-n_years <- 100
+n_iter <- 2
+n_years <- 10
 bio_mat <- matrix(rep(skip$biological, n_years), ncol = n_years)
 func_mat = matrix(rep(skip$functional, n_years), ncol = n_years)
-
+model_ages = min(rpt$ages):(min(rpt$ages)+length(data$waa)-1)
 data$wt_mature_f = data$waa * 0.5 * skip$functional
-max_age = length(data$waa)
-smin = 4
-smax = 30
+max_age = max(model_ages)
+smin = min(rpt$ages)
+smax = max_age
 skip_levels = c(0.1, 0.2, 0.3)
 # plot(4:33, (data$waa * 0.5))
 # lines(4:33, data$wt_mature_f)
@@ -30,7 +29,7 @@ skip_levels = c(0.1, 0.2, 0.3)
 expand.grid(age = 1:max_age,
             skip = skip_levels) %>%
   mutate(dome = mapply(flexi_curve, age, skip, smin, smax, 'dome'),
-         skewed_dome = mapply(flexi_curve, age, skip, smin, smax, 'skewed_dome', skew=1.5),
+         skewed_dome = mapply(flexi_curve, age, skip, smin, smax, 'skewed_dome', skew=-1),
          increasing = mapply(flexi_curve, age, skip, smin, smax, 'increase'),
          decreasing = mapply(flexi_curve, age, skip, smin, smax, 'decrease'),
          concave = mapply(flexi_curve, age, skip, smin, smax, 'inverse_dome'),
