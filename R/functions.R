@@ -109,6 +109,7 @@ mismatch_iter <- function(i, rpt, data, bio_mat, func_mat, rec_matrix, obj_f) {
       results[[s]]$projection$target_F[y] <- F_targets[[s]]
       
       # project 1-step
+      # note the iter (i) is handled from the parallel function
       step = project_step(N_prev, F_targets[[s]], M, rpt$slx[, 1], rec_matrix[i, y])
       # update state
       scen[[s]]$N_proj[, y] = step$N
