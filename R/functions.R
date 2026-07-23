@@ -353,7 +353,7 @@ flexi_curve <- function(age, skip, smin, smax, type = 'dome', skew = 0, width = 
   } else if (type == 'skewed_dome') {
     # Skewed dome: modifies a symmetric dome by applying a skew factor
     # skew affects how quickly the curve drops off on either side
-    dome_value <- skip * exp(-((age - midpoint) / spread)^2)
+    dome_value <- skip * exp(-((age - midpoint) / spread)^4)
     
     # Apply skew using a logistic-like tilt around midpoint, bounded for stability
     skew_modifier <- 1 / (1 + exp(-skew * (age - midpoint) / spread))
