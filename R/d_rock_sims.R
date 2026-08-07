@@ -13,8 +13,8 @@ skip <- readRDS(here::here("data", "d_dat.RDS")) %>%
   filter(age %in% 4:33)
 
 # globals ----
-n_iter <- 2
-n_years <- 10
+n_iter <- 50
+n_years <- 100
 bio_mat <- matrix(rep(skip$biological, n_years), ncol = n_years)
 func_mat = matrix(rep(skip$functional, n_years), ncol = n_years)
 model_ages = min(rpt$ages):(min(rpt$ages)+length(data$waa)-1)
@@ -22,11 +22,11 @@ data$wt_mature_f = data$waa * 0.5 * skip$functional
 max_age = max(model_ages)
 smin = min(rpt$ages)
 smax = max_age
-skip_levels = c(0.1, 0.2, 0.3)
+skip_levels = c(0.1, 0.2)
 # plot(4:33, (data$waa * 0.5))
 # lines(4:33, data$wt_mature_f)
 
-expand.grid(age = 1:max_age,
+expand.grid(age = min(rpt$ages):max_age,
             skip = skip_levels) %>%
   mutate(dome = mapply(flexi_curve, age, skip, smin, smax, 'dome'),
          skewed_dome = mapply(flexi_curve, age, skip, smin, smax, 'skewed_dome', skew=-1),
@@ -49,6 +49,7 @@ rec_matrix <- matrix(c(rlnorm(n_iter * collapse,
 # setup multicore 
 cl = parallel::makeCluster(parallel::detectCores() - 2)
 doParallel::registerDoParallel(cl)
+# run on observed maturity
 sim1d = omem_parallel(rpt, data, bio_mat, func_mat, rec_matrix, obj_f = f1)
 # parallel::stopCluster(cl)
 s1d <- extract_results(sim1d)
@@ -228,7 +229,7 @@ for (shp in shapes) {
     s_res = extract_results(sim_res)
     
     # results
-    saveRDS(sim_res, here::here("output", paste0("d_mcm_sim_", run_id, ".RDS")))
-    saveRDS(s_res, here::here("output", paste0("d_mcm_res_", run_id, ".RDS")))
+    saveRDS(sim_res, here::here("output", "dusky", paste0("d_mcm_sim_", run_id, ".RDS")))
+    saveRDS(s_res, here::here("output", "dusky", paste0("d_mcm_res_", run_id, ".RDS")))
   }
 }
